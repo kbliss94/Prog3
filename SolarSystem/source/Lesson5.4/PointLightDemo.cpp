@@ -15,7 +15,7 @@ namespace Rendering
 	const float PointLightDemo::ModelOrbitRate = 1;
 
 	PointLightDemo::PointLightDemo(Game & game, const shared_ptr<Camera>& camera) :
-		DrawableGameComponent(game, camera), mWorldMatrix(MatrixHelper::Identity), mPointLight(game, XMFLOAT3(5.0f, 0.0f, 10.0f), 50.0f),
+		DrawableGameComponent(game, camera), mWorldMatrix(MatrixHelper::Identity), mPointLight(game, XMFLOAT3(0.0f, 0.0f, 0.0f), 50.0f), //mPointLight(game, XMFLOAT3(5.0f, 0.0f, 10.0f), 50.0f),
 		mRenderStateHelper(game), mIndexCount(0), mTextPosition(0.0f, 40.0f), mAnimationEnabled(false)
 	{
 	}
@@ -126,6 +126,10 @@ namespace Rendering
 			matRot = XMMatrixRotationY(angle);
 			matTrans = XMMatrixTranslation(test, test, orbitRadius);
 			XMStoreFloat4x4(&mWorldMatrix, (matTrans * matRot));
+
+			//matTrans = XMMatrixTranslation(test, test, -10);
+			//XMStoreFloat4x4(&mWorldMatrix, matTrans);
+
 		}
 
 		if (mKeyboard != nullptr)

@@ -30,10 +30,19 @@ namespace Rendering
 	private:
 		struct CBufferPerObject
 		{
+			DirectX::XMFLOAT3 ObjectPosition;
+			//float ObjectRadius;
+
 			DirectX::XMFLOAT4X4 WorldViewProjection;
 
+			//CBufferPerObject() = default;
+			//CBufferPerObject(const DirectX::XMFLOAT4X4& wvp) : WorldViewProjection(wvp) { }
 			CBufferPerObject() = default;
-			CBufferPerObject(const DirectX::XMFLOAT4X4& wvp) : WorldViewProjection(wvp) { }
+			//CBufferPerObject(const DirectX::XMFLOAT4X4& wvp, const DirectX::XMFLOAT3 objectPosition, float objectRadius) :
+			//	WorldViewProjection(wvp), ObjectPosition(objectPosition), ObjectRadius(objectRadius) { }
+
+			CBufferPerObject(const DirectX::XMFLOAT4X4& wvp, const DirectX::XMFLOAT3 objectPosition) :
+				WorldViewProjection(wvp), ObjectPosition(objectPosition) { }
 		};
 
 		void CreateVertexBuffer(const Library::Mesh& mesh, ID3D11Buffer** vertexBuffer) const;

@@ -55,6 +55,14 @@ namespace Rendering
 			VSCBufferPerObject() = default;
 			VSCBufferPerObject(const DirectX::XMFLOAT4X4& wvp, const DirectX::XMFLOAT4X4& world) :
 				WorldViewProjection(wvp), World(world) { }
+
+			//DirectX::XMFLOAT4X4 WorldViewProjection;
+			//DirectX::XMFLOAT4X4 World;
+			//DirectX::XMFLOAT3 ObjectPosition;
+
+			//VSCBufferPerObject() = default;
+			//VSCBufferPerObject(const DirectX::XMFLOAT4X4& wvp, const DirectX::XMFLOAT4X4& world, const DirectX::XMFLOAT3 objPosition) :
+			//	WorldViewProjection(wvp), World(world), ObjectPosition(objPosition) { }
 		};
 
 		struct PSCBufferPerFrame

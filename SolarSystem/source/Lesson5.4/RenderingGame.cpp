@@ -6,7 +6,8 @@ using namespace Library;
 
 namespace Rendering
 {
-	const XMVECTORF32 RenderingGame::BackgroundColor = Colors::CornflowerBlue;
+	//const XMVECTORF32 RenderingGame::BackgroundColor = Colors::CornflowerBlue;
+	const XMVECTORF32 RenderingGame::BackgroundColor = Colors::Black;
 
 	RenderingGame::RenderingGame(std::function<void*()> getWindowCallback, std::function<void(SIZE&)> getRenderTargetSizeCallback) :
 		Game(getWindowCallback, getRenderTargetSizeCallback), mRenderStateHelper(*this)

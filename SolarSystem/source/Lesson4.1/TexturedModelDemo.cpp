@@ -6,7 +6,7 @@ using namespace DirectX;
 
 namespace Rendering
 {
-	const float TexturedModelDemo::RotationRate = XM_PI;
+	const float TexturedModelDemo::RotationRate = 1; // XM_PI;
 
 	TexturedModelDemo::TexturedModelDemo(Game & game, const shared_ptr<Camera>& camera) :
 		DrawableGameComponent(game, camera), mWorldMatrix(MatrixHelper::Identity), mIndexCount(0), mAnimationEnabled(true)
@@ -59,7 +59,8 @@ namespace Rendering
 		ThrowIfFailed(mGame->Direct3DDevice()->CreateBuffer(&constantBufferDesc, nullptr, mConstantBuffer.ReleaseAndGetAddressOf()), "ID3D11Device::CreateBuffer() failed.");
 
 		// Load a texture
-		wstring textureName = L"Content\\Textures\\EarthComposite.dds";
+		//wstring textureName = L"Content\\Textures\\EarthComposite.dds";
+		wstring textureName = L"Content\\Textures\\MarsComposite.dds";
 		ThrowIfFailed(CreateDDSTextureFromFile(mGame->Direct3DDevice(), textureName.c_str(), nullptr, mColorTexture.ReleaseAndGetAddressOf()), "CreateDDSTextureFromFile() failed.");
 	}
 
@@ -95,6 +96,10 @@ namespace Rendering
 		XMMATRIX wvp = worldMatrix * mCamera->ViewProjectionMatrix();
 		wvp = XMMatrixTranspose(wvp);
 		XMStoreFloat4x4(&mCBufferPerObject.WorldViewProjection, wvp);
+
+		//////
+		mCBufferPerObject.ObjectPosition = XMFLOAT3(5.0f, 0.0f, 10.0f);
+		//////
 
 		direct3DDeviceContext->UpdateSubresource(mConstantBuffer.Get(), 0, nullptr, &mCBufferPerObject, 0, 0);
 		direct3DDeviceContext->VSSetConstantBuffers(0, 1, mConstantBuffer.GetAddressOf());

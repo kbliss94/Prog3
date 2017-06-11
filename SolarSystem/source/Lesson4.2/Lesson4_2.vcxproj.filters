@@ -16,6 +16,7 @@
     <ClCompile Include="Program.cpp" />
     <ClCompile Include="AddressingModesDemo.cpp" />
     <ClCompile Include="pch.cpp" />
+    <ClCompile Include="..\Lesson3.3\pch.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="RenderingGame.h" />
