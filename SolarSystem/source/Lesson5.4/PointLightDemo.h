@@ -102,6 +102,8 @@ namespace Rendering
 		static const float ModelRotationRate;
 		static const float LightModulationRate;
 		static const float LightMovementRate;
+		
+		static const float ModelOrbitRate;
 
 		PSCBufferPerFrame mPSCBufferPerFrameData;
 		DirectX::XMFLOAT4X4 mWorldMatrix;

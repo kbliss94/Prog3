@@ -8,9 +8,11 @@ namespace Rendering
 {
 	RTTI_DEFINITIONS(PointLightDemo)
 
-	const float PointLightDemo::ModelRotationRate = XM_PI;
+	const float PointLightDemo::ModelRotationRate = 1;//XM_PI;
 	const float PointLightDemo::LightModulationRate = UCHAR_MAX;
 	const float PointLightDemo::LightMovementRate = 10.0f;
+
+	const float PointLightDemo::ModelOrbitRate = 1;
 
 	PointLightDemo::PointLightDemo(Game & game, const shared_ptr<Camera>& camera) :
 		DrawableGameComponent(game, camera), mWorldMatrix(MatrixHelper::Identity), mPointLight(game, XMFLOAT3(5.0f, 0.0f, 10.0f), 50.0f),
@@ -108,10 +110,22 @@ namespace Rendering
 	{
 		static float angle = 0.0f;
 
+		static float test = 0.0f;
+		static float orbitRadius = 20;
+
+		XMMATRIX matRot;
+		XMMATRIX matTrans;
+
 		if (mAnimationEnabled)
 		{
+			//angle += gameTime.ElapsedGameTimeSeconds().count() * ModelRotationRate;
+			//XMStoreFloat4x4(&mWorldMatrix, XMMatrixRotationY(angle));
+
 			angle += gameTime.ElapsedGameTimeSeconds().count() * ModelRotationRate;
-			XMStoreFloat4x4(&mWorldMatrix, XMMatrixRotationY(angle));
+			
+			matRot = XMMatrixRotationY(angle);
+			matTrans = XMMatrixTranslation(test, test, orbitRadius);
+			XMStoreFloat4x4(&mWorldMatrix, (matTrans * matRot));
 		}
 
 		if (mKeyboard != nullptr)

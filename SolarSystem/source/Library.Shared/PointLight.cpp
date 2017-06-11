@@ -15,8 +15,13 @@ namespace Library
 	}
 
 	PointLight::PointLight(Game& game, const DirectX::XMFLOAT3& position, float radius) :
-		Light(game), mPosition(position), mRadius(radius)
+		Light(game), mPosition(position), mRadius(radius), mUp(Vector3Helper::Up)
 	{
+	}
+
+	XMVECTOR PointLight::UpVector() const
+	{
+		return XMLoadFloat3(&mUp);
 	}
 
 	XMFLOAT3& PointLight::Position()

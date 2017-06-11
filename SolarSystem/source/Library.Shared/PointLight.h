@@ -17,6 +17,8 @@ namespace Library
 		PointLight(PointLight&&) = default;
 		virtual ~PointLight() = default;
 
+		DirectX::XMVECTOR UpVector() const;
+
 		DirectX::XMFLOAT3& Position();
 		DirectX::XMVECTOR PositionVector() const;
 		FLOAT Radius() const;
@@ -31,6 +33,8 @@ namespace Library
 	protected:
 		DirectX::XMFLOAT3 mPosition;
 		float mRadius;
+
+		DirectX::XMFLOAT3 mUp;
 	};
 }
 
