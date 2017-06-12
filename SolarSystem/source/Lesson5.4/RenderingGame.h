@@ -33,6 +33,7 @@ namespace Rendering
 
 	private:
 		static const DirectX::XMVECTORF32 BackgroundColor;
+		static const float DistanceMultiplier;
 
 		Library::RenderStateHelper mRenderStateHelper;
 		std::shared_ptr<Library::KeyboardComponent> mKeyboard;
@@ -46,6 +47,10 @@ namespace Rendering
 		std::shared_ptr<PointLightDemo> mVenus;
 		std::shared_ptr<PointLightDemo> mEarth;
 		std::shared_ptr<PointLightDemo> mMars;
-
+		std::shared_ptr<PointLightDemo> mJupiter;
+		std::shared_ptr<PointLightDemo> mSaturn;
+		std::shared_ptr<PointLightDemo> mUranus;
+		std::shared_ptr<PointLightDemo> mNeptune;
+		std::shared_ptr<PointLightDemo> mPluto;
 	};
 }

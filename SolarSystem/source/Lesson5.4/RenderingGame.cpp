@@ -8,6 +8,7 @@ namespace Rendering
 {
 	//const XMVECTORF32 RenderingGame::BackgroundColor = Colors::CornflowerBlue;
 	const XMVECTORF32 RenderingGame::BackgroundColor = Colors::Black;
+	const float RenderingGame::DistanceMultiplier = 50.0f;
 
 	RenderingGame::RenderingGame(std::function<void*()> getWindowCallback, std::function<void(SIZE&)> getRenderTargetSizeCallback) :
 		Game(getWindowCallback, getRenderTargetSizeCallback), mRenderStateHelper(*this)
@@ -38,17 +39,34 @@ namespace Rendering
 		mGrid = make_shared<Grid>(*this, mCamera);
 		mComponents.push_back(mGrid);
 
-		mMercury = make_shared<PointLightDemo>(*this, mCamera, 19.35f, .382f, L"Content\\Textures\\MercuryComposite.dds", L"Content\\Textures\\MarsSpecularMap.png");
+		mMercury = make_shared<PointLightDemo>(*this, mCamera, (.387f * DistanceMultiplier), .382f, L"Content\\Textures\\MercuryComposite.dds", L"Content\\Textures\\MarsSpecularMap.png");
 		mComponents.push_back(mMercury);
 
-		mVenus = make_shared<PointLightDemo>(*this, mCamera, 36.15f, .949f, L"Content\\Textures\\VenusComposite.dds", L"Content\\Textures\\MarsSpecularMap.png");
+		mVenus = make_shared<PointLightDemo>(*this, mCamera, (.723f * DistanceMultiplier), .949f, L"Content\\Textures\\VenusComposite.dds", L"Content\\Textures\\MarsSpecularMap.png");
 		mComponents.push_back(mVenus);
 
-		mEarth = make_shared<PointLightDemo>(*this, mCamera, 50.0f, 1.0f, L"Content\\Textures\\EarthComposite.dds", L"Content\\Textures\\EarthSpecularMap.png");
+		mEarth = make_shared<PointLightDemo>(*this, mCamera, (1.0f * DistanceMultiplier), 1.0f, L"Content\\Textures\\EarthComposite.dds", L"Content\\Textures\\EarthSpecularMap.png");
 		mComponents.push_back(mEarth);
 
-		mMars = make_shared<PointLightDemo>(*this, mCamera, 76.2f, .532f, L"Content\\Textures\\MarsComposite.dds", L"Content\\Textures\\MarsSpecularMap.png");
+		mMars = make_shared<PointLightDemo>(*this, mCamera, (1.524f * DistanceMultiplier), .532f, L"Content\\Textures\\MarsComposite.dds", L"Content\\Textures\\MarsSpecularMap.png");
 		mComponents.push_back(mMars);
+
+		//jupiter
+
+		mJupiter = make_shared<PointLightDemo>(*this, mCamera, (5.203f * DistanceMultiplier), 11.19f, L"Content\\Textures\\JupiterComposite.dds", L"Content\\Textures\\MarsSpecularMap.png");
+		mComponents.push_back(mJupiter);
+
+		mSaturn = make_shared<PointLightDemo>(*this, mCamera, (9.582f * DistanceMultiplier), 9.26f, L"Content\\Textures\\SaturnComposite.dds", L"Content\\Textures\\MarsSpecularMap.png");
+		mComponents.push_back(mSaturn);
+
+		mUranus = make_shared<PointLightDemo>(*this, mCamera, (19.2f * DistanceMultiplier), 4.01f, L"Content\\Textures\\UranusComposite.dds", L"Content\\Textures\\MarsSpecularMap.png");
+		mComponents.push_back(mUranus);
+
+		mNeptune = make_shared<PointLightDemo>(*this, mCamera, (30.05f * DistanceMultiplier), 3.88f, L"Content\\Textures\\NeptuneComposite.dds", L"Content\\Textures\\MarsSpecularMap.png");
+		mComponents.push_back(mNeptune);
+
+		mPluto = make_shared<PointLightDemo>(*this, mCamera, (39.48f * DistanceMultiplier), .18f, L"Content\\Textures\\PlutoComposite.dds", L"Content\\Textures\\MarsSpecularMap.png");
+		mComponents.push_back(mPluto);
 
 		Game::Initialize();
 

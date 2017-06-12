@@ -13,7 +13,7 @@ namespace Rendering
 	const float PointLightDemo::LightMovementRate = 10.0f;
 
 	PointLightDemo::PointLightDemo(Game & game, const shared_ptr<Camera>& camera, float orbitRadius, float scale, wstring texFilename, wstring specFilename) :
-		DrawableGameComponent(game, camera), mWorldMatrix(MatrixHelper::Identity), mPointLight(game, XMFLOAT3(0.0f, 0.0f, 0.0f), 150.0f), //mPointLight(game, XMFLOAT3(5.0f, 0.0f, 10.0f), 50.0f),
+		DrawableGameComponent(game, camera), mWorldMatrix(MatrixHelper::Identity), mPointLight(game, XMFLOAT3(0.0f, 0.0f, 0.0f), 500.0f), //mPointLight(game, XMFLOAT3(5.0f, 0.0f, 10.0f), 50.0f),
 		mRenderStateHelper(game), mIndexCount(0), mTextPosition(0.0f, 40.0f), mAnimationEnabled(false), mOrbitRadius(orbitRadius), mTextureFilename(texFilename), 
 		mSpecularFilename(specFilename), mScale(scale)
 	{
