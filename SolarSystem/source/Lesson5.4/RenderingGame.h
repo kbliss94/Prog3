@@ -111,7 +111,7 @@ namespace Rendering
 		//std::shared_ptr<PointLightDemo> mPluto;
 		std::shared_ptr<PointLightDemo> mSun;
 
-		std::shared_ptr<CelestialBodies> mMercury;
+		//std::shared_ptr<CelestialBodies> mMercury;
 
 		OrbitalPeriods mOrbitalPeriods;
 		RotationalPeriods mRotationalPeriods;

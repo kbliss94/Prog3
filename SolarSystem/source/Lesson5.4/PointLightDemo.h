@@ -143,6 +143,6 @@ namespace Rendering
 		DirectX::XMFLOAT2 mTextPosition;
 		bool mAnimationEnabled;
 
-		CelestialBodies mMercury;
+		std::shared_ptr<CelestialBodies> mMercury;
 	};
 }

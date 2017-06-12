@@ -26,7 +26,8 @@ namespace Rendering
 		RTTI_DECLARATIONS(CelestialBodies, Library::DrawableGameComponent)
 
 	public:
-		CelestialBodies(Library::Game& game, const std::shared_ptr<Library::Camera>& camera, float orbitRadius, float scale, float orbPer, float rotPer, float axTilt, std::wstring texFilename, std::wstring specFilename);
+		CelestialBodies(Library::Game& game, const std::shared_ptr<Library::Camera>& camera, float orbitRadius, float scale, float orbPer, float rotPer, float axTilt, 
+			std::wstring texFilename, std::wstring specFilename, Microsoft::WRL::ComPtr<ID3D11Buffer> frameBuffer, Microsoft::WRL::ComPtr<ID3D11Buffer> objectBuffer);
 
 		bool AnimationEnabled() const;
 		void SetAnimationEnabled(bool enabled);
@@ -96,7 +97,6 @@ namespace Rendering
 		void CreateVertexBuffer(const Library::Mesh& mesh, ID3D11Buffer** vertexBuffer) const;
 		void ToggleAnimation();
 
-		static const float ModelRotationRate;
 		static const float LightModulationRate;
 		static const float LightMovementRate;
 
@@ -111,12 +111,9 @@ namespace Rendering
 		float mOrbitalAngle;
 		float mAxialTilt;
 
-		PSCBufferPerFrame mPSCBufferPerFrameData;
 		DirectX::XMFLOAT4X4 mWorldMatrix;
 		VSCBufferPerFrame mVSCBufferPerFrameData;
 		VSCBufferPerObject mVSCBufferPerObjectData;
-		PSCBufferPerObject mPSCBufferPerObjectData;
-		//Library::PointLight mPointLight;
 		Library::RenderStateHelper mRenderStateHelper;
 		Microsoft::WRL::ComPtr<ID3D11VertexShader> mVertexShader;
 		Microsoft::WRL::ComPtr<ID3D11PixelShader> mPixelShader;
@@ -125,16 +122,10 @@ namespace Rendering
 		Microsoft::WRL::ComPtr<ID3D11Buffer> mIndexBuffer;
 		Microsoft::WRL::ComPtr<ID3D11Buffer> mVSCBufferPerFrame;
 		Microsoft::WRL::ComPtr<ID3D11Buffer> mVSCBufferPerObject;
-		Microsoft::WRL::ComPtr<ID3D11Buffer> mPSCBufferPerFrame;
-		Microsoft::WRL::ComPtr<ID3D11Buffer> mPSCBufferPerObject;
 		Microsoft::WRL::ComPtr<ID3D11ShaderResourceView> mColorTexture;
 		Microsoft::WRL::ComPtr<ID3D11ShaderResourceView> mSpecularMap;
-		//std::unique_ptr<Library::ProxyModel> mProxyModel;
 		Library::KeyboardComponent* mKeyboard;
 		std::uint32_t mIndexCount;
-		std::unique_ptr<DirectX::SpriteBatch> mSpriteBatch;
-		std::unique_ptr<DirectX::SpriteFont> mSpriteFont;
-		DirectX::XMFLOAT2 mTextPosition;
 		bool mAnimationEnabled;
 	};
 }

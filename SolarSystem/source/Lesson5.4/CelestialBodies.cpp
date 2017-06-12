@@ -9,14 +9,15 @@ namespace Rendering
 {
 	RTTI_DEFINITIONS(CelestialBodies)
 
-	const float CelestialBodies::ModelRotationRate = 0.3f;//XM_PI;
 	const float CelestialBodies::LightModulationRate = UCHAR_MAX;
 	const float CelestialBodies::LightMovementRate = 10.0f;
 
-	CelestialBodies::CelestialBodies(Game & game, const shared_ptr<Camera>& camera, float orbitRadius, float scale, float orbPer, float rotPer, float axTilt, wstring texFilename, wstring specFilename) :
-		DrawableGameComponent(game, camera), mWorldMatrix(MatrixHelper::Identity), mRenderStateHelper(game), mIndexCount(0), mTextPosition(0.0f, 40.0f), 
+	CelestialBodies::CelestialBodies(Game & game, const shared_ptr<Camera>& camera, float orbitRadius, float scale, float orbPer, float rotPer, float axTilt, 
+		wstring texFilename, wstring specFilename, Microsoft::WRL::ComPtr<ID3D11Buffer> frameBuffer, Microsoft::WRL::ComPtr<ID3D11Buffer> objectBuffer) :
+		DrawableGameComponent(game, camera), mWorldMatrix(MatrixHelper::Identity), mRenderStateHelper(game), mIndexCount(0),
 		mAnimationEnabled(false), mOrbitalDistance(orbitRadius), mTextureFilename(texFilename), mSpecularFilename(specFilename), mScale(scale), 
-		mOrbitalPeriod(orbPer), mRotationalPeriod(rotPer), mAxialAngle(0.0f), mOrbitalAngle(0.0f), mAxialTilt(axTilt)
+		mOrbitalPeriod(orbPer), mRotationalPeriod(rotPer), mAxialAngle(0.0f), mOrbitalAngle(0.0f), mAxialTilt(axTilt), 
+		mVSCBufferPerFrame(frameBuffer), mVSCBufferPerObject(objectBuffer)
 	{
 	}
 
@@ -61,35 +62,16 @@ namespace Rendering
 		mesh->CreateIndexBuffer(*mGame->Direct3DDevice(), mIndexBuffer.ReleaseAndGetAddressOf());
 		mIndexCount = static_cast<uint32_t>(mesh->Indices().size());
 
-		// Create constant buffers
-		D3D11_BUFFER_DESC constantBufferDesc = { 0 };
-		constantBufferDesc.ByteWidth = sizeof(VSCBufferPerFrame);
-		constantBufferDesc.BindFlags = D3D11_BIND_CONSTANT_BUFFER;
-		ThrowIfFailed(mGame->Direct3DDevice()->CreateBuffer(&constantBufferDesc, nullptr, mVSCBufferPerFrame.ReleaseAndGetAddressOf()), "ID3D11Device::CreateBuffer() failed.");
-
-		constantBufferDesc.ByteWidth = sizeof(VSCBufferPerObject);
-		ThrowIfFailed(mGame->Direct3DDevice()->CreateBuffer(&constantBufferDesc, nullptr, mVSCBufferPerObject.ReleaseAndGetAddressOf()), "ID3D11Device::CreateBuffer() failed.");
-
-		constantBufferDesc.ByteWidth = sizeof(PSCBufferPerFrame);
-		ThrowIfFailed(mGame->Direct3DDevice()->CreateBuffer(&constantBufferDesc, nullptr, mPSCBufferPerFrame.ReleaseAndGetAddressOf()), "ID3D11Device::CreateBuffer() failed.");
-
-		constantBufferDesc.ByteWidth = sizeof(PSCBufferPerObject);
-		ThrowIfFailed(mGame->Direct3DDevice()->CreateBuffer(&constantBufferDesc, nullptr, mPSCBufferPerObject.ReleaseAndGetAddressOf()), "ID3D11Device::CreateBuffer() failed.");
+		// Initialize shaders
+		mGame->Direct3DDeviceContext()->UpdateSubresource(mVSCBufferPerFrame.Get(), 0, nullptr, &mVSCBufferPerFrameData, 0, 0);
+		mGame->Direct3DDeviceContext()->UpdateSubresource(mVSCBufferPerObject.Get(), 0, nullptr, &mVSCBufferPerObjectData, 0, 0);
 
 		// Load textures for the color and specular maps
 		ThrowIfFailed(CreateDDSTextureFromFile(mGame->Direct3DDevice(), mTextureFilename.c_str(), nullptr, mColorTexture.ReleaseAndGetAddressOf()), "CreateDDSTextureFromFile() failed.");
 		ThrowIfFailed(CreateWICTextureFromFile(mGame->Direct3DDevice(), mSpecularFilename.c_str(), nullptr, mSpecularMap.ReleaseAndGetAddressOf()), "CreateWICTextureFromFile() failed.");
 
-		// Create text rendering helpers
-		mSpriteBatch = make_unique<SpriteBatch>(mGame->Direct3DDeviceContext());
-		mSpriteFont = make_unique<SpriteFont>(mGame->Direct3DDevice(), L"Content\\Fonts\\Arial_14_Regular.spritefont");
-
 		// Retrieve the keyboard service
 		mKeyboard = reinterpret_cast<KeyboardComponent*>(mGame->Services().GetService(KeyboardComponent::TypeIdClass()));
-
-		// Update the vertex and pixel shader constant buffers
-		mGame->Direct3DDeviceContext()->UpdateSubresource(mVSCBufferPerFrame.Get(), 0, nullptr, &mVSCBufferPerFrameData, 0, 0);
-		mGame->Direct3DDeviceContext()->UpdateSubresource(mPSCBufferPerObject.Get(), 0, nullptr, &mPSCBufferPerObjectData, 0, 0);
 	}
 
 	void CelestialBodies::Update(const GameTime& gameTime)
@@ -154,35 +136,11 @@ namespace Rendering
 		ID3D11Buffer* VSConstantBuffers[] = { mVSCBufferPerFrame.Get(), mVSCBufferPerObject.Get() };
 		direct3DDeviceContext->VSSetConstantBuffers(0, ARRAYSIZE(VSConstantBuffers), VSConstantBuffers);
 
-		mPSCBufferPerFrameData.CameraPosition = mCamera->Position();
-		direct3DDeviceContext->UpdateSubresource(mPSCBufferPerFrame.Get(), 0, nullptr, &mPSCBufferPerFrameData, 0, 0);
-
-		ID3D11Buffer* PSConstantBuffers[] = { mPSCBufferPerFrame.Get(), mPSCBufferPerObject.Get() };
-		direct3DDeviceContext->PSSetConstantBuffers(0, ARRAYSIZE(PSConstantBuffers), PSConstantBuffers);
-
 		ID3D11ShaderResourceView* PSShaderResources[] = { mColorTexture.Get(), mSpecularMap.Get() };
 		direct3DDeviceContext->PSSetShaderResources(0, ARRAYSIZE(PSShaderResources), PSShaderResources);
 		direct3DDeviceContext->PSSetSamplers(0, 1, SamplerStates::TrilinearWrap.GetAddressOf());
 
 		direct3DDeviceContext->DrawIndexed(mIndexCount, 0, 0);
-
-		// Draw help text
-		mRenderStateHelper.SaveAll();
-		mSpriteBatch->Begin();
-
-		wostringstream helpLabel;
-		//helpLabel << "Ambient Intensity (+PgUp/-PgDn): " << mPSCBufferPerFrameData.AmbientColor.x << "\n";
-		//helpLabel << L"Specular Intensity (+Insert/-Delete): " << mPSCBufferPerObjectData.SpecularColor.x << "\n";
-		//helpLabel << L"Specular Power (+O/-P): " << mPSCBufferPerObjectData.SpecularPower << "\n";
-		//helpLabel << L"Point Light Intensity (+Home/-End): " << mPSCBufferPerFrameData.LightColor.x << "\n";
-		//helpLabel << L"Point Light Radius (+V/-B): " << mVSCBufferPerFrameData.LightRadius << "\n";
-		//helpLabel << L"Move Point Light (8/2, 4/6, 3/9)" << "\n";
-		//helpLabel << L"Toggle Grid (G)" << "\n";
-		//helpLabel << L"Toggle Animation (Space)" << "\n";
-
-		mSpriteFont->DrawString(mSpriteBatch.get(), helpLabel.str().c_str(), mTextPosition);
-		mSpriteBatch->End();
-		mRenderStateHelper.RestoreAll();
 	}
 
 	void CelestialBodies::CreateVertexBuffer(const Mesh& mesh, ID3D11Buffer** vertexBuffer) const
