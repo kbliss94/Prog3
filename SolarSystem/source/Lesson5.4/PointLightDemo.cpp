@@ -8,15 +8,14 @@ namespace Rendering
 {
 	RTTI_DEFINITIONS(PointLightDemo)
 
-	const float PointLightDemo::ModelRotationRate = 1;//XM_PI;
+	const float PointLightDemo::ModelRotationRate = 0.3f;//XM_PI;
 	const float PointLightDemo::LightModulationRate = UCHAR_MAX;
 	const float PointLightDemo::LightMovementRate = 10.0f;
 
-	const float PointLightDemo::ModelOrbitRate = 1;
-
-	PointLightDemo::PointLightDemo(Game & game, const shared_ptr<Camera>& camera) :
-		DrawableGameComponent(game, camera), mWorldMatrix(MatrixHelper::Identity), mPointLight(game, XMFLOAT3(0.0f, 0.0f, 0.0f), 50.0f), //mPointLight(game, XMFLOAT3(5.0f, 0.0f, 10.0f), 50.0f),
-		mRenderStateHelper(game), mIndexCount(0), mTextPosition(0.0f, 40.0f), mAnimationEnabled(false)
+	PointLightDemo::PointLightDemo(Game & game, const shared_ptr<Camera>& camera, float orbitRadius, float scale, wstring texFilename, wstring specFilename) :
+		DrawableGameComponent(game, camera), mWorldMatrix(MatrixHelper::Identity), mPointLight(game, XMFLOAT3(0.0f, 0.0f, 0.0f), 150.0f), //mPointLight(game, XMFLOAT3(5.0f, 0.0f, 10.0f), 50.0f),
+		mRenderStateHelper(game), mIndexCount(0), mTextPosition(0.0f, 40.0f), mAnimationEnabled(false), mOrbitRadius(orbitRadius), mTextureFilename(texFilename), 
+		mSpecularFilename(specFilename), mScale(scale)
 	{
 	}
 
@@ -77,11 +76,14 @@ namespace Rendering
 		ThrowIfFailed(mGame->Direct3DDevice()->CreateBuffer(&constantBufferDesc, nullptr, mPSCBufferPerObject.ReleaseAndGetAddressOf()), "ID3D11Device::CreateBuffer() failed.");
 
 		// Load textures for the color and specular maps
-		wstring textureName = L"Content\\Textures\\EarthComposite.dds";
-		ThrowIfFailed(CreateDDSTextureFromFile(mGame->Direct3DDevice(), textureName.c_str(), nullptr, mColorTexture.ReleaseAndGetAddressOf()), "CreateDDSTextureFromFile() failed.");
+		ThrowIfFailed(CreateDDSTextureFromFile(mGame->Direct3DDevice(), mTextureFilename.c_str(), nullptr, mColorTexture.ReleaseAndGetAddressOf()), "CreateDDSTextureFromFile() failed.");
+		ThrowIfFailed(CreateWICTextureFromFile(mGame->Direct3DDevice(), mSpecularFilename.c_str(), nullptr, mSpecularMap.ReleaseAndGetAddressOf()), "CreateWICTextureFromFile() failed.");
 
-		textureName = L"Content\\Textures\\EarthSpecularMap.png";
-		ThrowIfFailed(CreateWICTextureFromFile(mGame->Direct3DDevice(), textureName.c_str(), nullptr, mSpecularMap.ReleaseAndGetAddressOf()), "CreateWICTextureFromFile() failed.");
+		//wstring textureName = L"Content\\Textures\\EarthComposite.dds";
+		//ThrowIfFailed(CreateDDSTextureFromFile(mGame->Direct3DDevice(), textureName.c_str(), nullptr, mColorTexture.ReleaseAndGetAddressOf()), "CreateDDSTextureFromFile() failed.");
+
+		//textureName = L"Content\\Textures\\EarthSpecularMap.png";
+		//ThrowIfFailed(CreateWICTextureFromFile(mGame->Direct3DDevice(), textureName.c_str(), nullptr, mSpecularMap.ReleaseAndGetAddressOf()), "CreateWICTextureFromFile() failed.");
 
 		// Create text rendering helpers
 		mSpriteBatch = make_unique<SpriteBatch>(mGame->Direct3DDeviceContext());
@@ -111,10 +113,11 @@ namespace Rendering
 		static float angle = 0.0f;
 
 		static float test = 0.0f;
-		static float orbitRadius = 20;
+		//static float orbitRadius = 20;
 
 		XMMATRIX matRot;
 		XMMATRIX matTrans;
+		XMMATRIX matScale;
 
 		if (mAnimationEnabled)
 		{
@@ -123,13 +126,14 @@ namespace Rendering
 
 			angle += gameTime.ElapsedGameTimeSeconds().count() * ModelRotationRate;
 			
+			matScale = XMMatrixScaling(mScale, mScale, mScale);
 			matRot = XMMatrixRotationY(angle);
-			matTrans = XMMatrixTranslation(test, test, orbitRadius);
-			XMStoreFloat4x4(&mWorldMatrix, (matTrans * matRot));
+			//matTrans = XMMatrixTranslation(test, test, orbitRadius);
+			matTrans = XMMatrixTranslation(test, test, mOrbitRadius);
+			XMStoreFloat4x4(&mWorldMatrix, (matScale * matTrans * matRot));
 
 			//matTrans = XMMatrixTranslation(test, test, -10);
 			//XMStoreFloat4x4(&mWorldMatrix, matTrans);
-
 		}
 
 		if (mKeyboard != nullptr)
@@ -166,9 +170,12 @@ namespace Rendering
 
 		XMMATRIX worldMatrix = XMLoadFloat4x4(&mWorldMatrix);
 		XMMATRIX wvp = worldMatrix * mCamera->ViewProjectionMatrix();
+
 		wvp = XMMatrixTranspose(wvp);
+
 		XMStoreFloat4x4(&mVSCBufferPerObjectData.WorldViewProjection, wvp);
 		XMStoreFloat4x4(&mVSCBufferPerObjectData.World, XMMatrixTranspose(worldMatrix));
+
 		direct3DDeviceContext->UpdateSubresource(mVSCBufferPerObject.Get(), 0, nullptr, &mVSCBufferPerObjectData, 0, 0);
 
 		ID3D11Buffer* VSConstantBuffers[] = { mVSCBufferPerFrame.Get(), mVSCBufferPerObject.Get() };
@@ -193,14 +200,14 @@ namespace Rendering
 		mSpriteBatch->Begin();
 
 		wostringstream helpLabel;
-		helpLabel << "Ambient Intensity (+PgUp/-PgDn): " << mPSCBufferPerFrameData.AmbientColor.x << "\n";
-		helpLabel << L"Specular Intensity (+Insert/-Delete): " << mPSCBufferPerObjectData.SpecularColor.x << "\n";
-		helpLabel << L"Specular Power (+O/-P): " << mPSCBufferPerObjectData.SpecularPower << "\n";
-		helpLabel << L"Point Light Intensity (+Home/-End): " << mPSCBufferPerFrameData.LightColor.x << "\n";
-		helpLabel << L"Point Light Radius (+V/-B): " << mVSCBufferPerFrameData.LightRadius << "\n";
-		helpLabel << L"Move Point Light (8/2, 4/6, 3/9)" << "\n";
-		helpLabel << L"Toggle Grid (G)" << "\n";
-		helpLabel << L"Toggle Animation (Space)" << "\n";
+		//helpLabel << "Ambient Intensity (+PgUp/-PgDn): " << mPSCBufferPerFrameData.AmbientColor.x << "\n";
+		//helpLabel << L"Specular Intensity (+Insert/-Delete): " << mPSCBufferPerObjectData.SpecularColor.x << "\n";
+		//helpLabel << L"Specular Power (+O/-P): " << mPSCBufferPerObjectData.SpecularPower << "\n";
+		//helpLabel << L"Point Light Intensity (+Home/-End): " << mPSCBufferPerFrameData.LightColor.x << "\n";
+		//helpLabel << L"Point Light Radius (+V/-B): " << mVSCBufferPerFrameData.LightRadius << "\n";
+		//helpLabel << L"Move Point Light (8/2, 4/6, 3/9)" << "\n";
+		//helpLabel << L"Toggle Grid (G)" << "\n";
+		//helpLabel << L"Toggle Animation (Space)" << "\n";
 	
 		mSpriteFont->DrawString(mSpriteBatch.get(), helpLabel.str().c_str(), mTextPosition);
 		mSpriteBatch->End();
@@ -364,6 +371,7 @@ namespace Rendering
 	void PointLightDemo::UpdateSpecularLight(const GameTime& gameTime)
 	{
 		static float specularIntensity = mPSCBufferPerObjectData.SpecularColor.x;
+
 		bool updateCBuffer = false;
 
 		if (mKeyboard->IsKeyDown(Keys::Insert) && specularIntensity < 1.0f)

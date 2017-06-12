@@ -41,6 +41,11 @@ namespace Rendering
 		std::shared_ptr<Library::FpsComponent> mFpsComponent;
 		std::shared_ptr<Library::Camera> mCamera;
 		std::shared_ptr<Library::Grid> mGrid;
-		std::shared_ptr<PointLightDemo> mPointLightDemo;
+
+		std::shared_ptr<PointLightDemo> mMercury;
+		std::shared_ptr<PointLightDemo> mVenus;
+		std::shared_ptr<PointLightDemo> mEarth;
+		std::shared_ptr<PointLightDemo> mMars;
+
 	};
 }

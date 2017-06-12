@@ -26,7 +26,8 @@ namespace Rendering
 		RTTI_DECLARATIONS(PointLightDemo, Library::DrawableGameComponent)
 
 	public:
-		PointLightDemo(Library::Game& game, const std::shared_ptr<Library::Camera>& camera);
+		//PointLightDemo(Library::Game& game, const std::shared_ptr<Library::Camera>& camera);
+		PointLightDemo(Library::Game& game, const std::shared_ptr<Library::Camera>& camera, float orbitRadius, float scale, std::wstring texFilename, std::wstring specFilename);
 
 		bool AnimationEnabled() const;
 		void SetAnimationEnabled(bool enabled);
@@ -55,14 +56,6 @@ namespace Rendering
 			VSCBufferPerObject() = default;
 			VSCBufferPerObject(const DirectX::XMFLOAT4X4& wvp, const DirectX::XMFLOAT4X4& world) :
 				WorldViewProjection(wvp), World(world) { }
-
-			//DirectX::XMFLOAT4X4 WorldViewProjection;
-			//DirectX::XMFLOAT4X4 World;
-			//DirectX::XMFLOAT3 ObjectPosition;
-
-			//VSCBufferPerObject() = default;
-			//VSCBufferPerObject(const DirectX::XMFLOAT4X4& wvp, const DirectX::XMFLOAT4X4& world, const DirectX::XMFLOAT3 objPosition) :
-			//	WorldViewProjection(wvp), World(world), ObjectPosition(objPosition) { }
 		};
 
 		struct PSCBufferPerFrame
@@ -110,8 +103,11 @@ namespace Rendering
 		static const float ModelRotationRate;
 		static const float LightModulationRate;
 		static const float LightMovementRate;
-		
-		static const float ModelOrbitRate;
+
+		float mOrbitRadius;
+		float mScale;
+		std::wstring mTextureFilename;
+		std::wstring mSpecularFilename;
 
 		PSCBufferPerFrame mPSCBufferPerFrameData;
 		DirectX::XMFLOAT4X4 mWorldMatrix;

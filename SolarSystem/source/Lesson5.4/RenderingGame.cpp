@@ -38,8 +38,17 @@ namespace Rendering
 		mGrid = make_shared<Grid>(*this, mCamera);
 		mComponents.push_back(mGrid);
 
-		mPointLightDemo = make_shared<PointLightDemo>(*this, mCamera);
-		mComponents.push_back(mPointLightDemo);
+		mMercury = make_shared<PointLightDemo>(*this, mCamera, 19.35f, .382f, L"Content\\Textures\\MercuryComposite.dds", L"Content\\Textures\\MarsSpecularMap.png");
+		mComponents.push_back(mMercury);
+
+		mVenus = make_shared<PointLightDemo>(*this, mCamera, 36.15f, .949f, L"Content\\Textures\\VenusComposite.dds", L"Content\\Textures\\MarsSpecularMap.png");
+		mComponents.push_back(mVenus);
+
+		mEarth = make_shared<PointLightDemo>(*this, mCamera, 50.0f, 1.0f, L"Content\\Textures\\EarthComposite.dds", L"Content\\Textures\\EarthSpecularMap.png");
+		mComponents.push_back(mEarth);
+
+		mMars = make_shared<PointLightDemo>(*this, mCamera, 76.2f, .532f, L"Content\\Textures\\MarsComposite.dds", L"Content\\Textures\\MarsSpecularMap.png");
+		mComponents.push_back(mMars);
 
 		Game::Initialize();
 
