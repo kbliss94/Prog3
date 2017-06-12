@@ -12,6 +12,9 @@ namespace Rendering
 	const float PointLightDemo::LightModulationRate = UCHAR_MAX;
 	const float PointLightDemo::LightMovementRate = 10.0f;
 
+	const float PointLightDemo::DistanceMultiplier = 50.0f;
+	//const int PointLightDemo::NumCelestialBodies = 10;
+
 	PointLightDemo::PointLightDemo(Game & game, const shared_ptr<Camera>& camera, float orbitRadius, float scale, float orbPer, float rotPer, float axTilt, wstring texFilename, wstring specFilename) :
 		DrawableGameComponent(game, camera), mWorldMatrix(MatrixHelper::Identity), mPointLight(game, XMFLOAT3(0.0f, 0.0f, 0.0f), 100000.0f), //mPointLight(game, XMFLOAT3(5.0f, 0.0f, 10.0f), 50.0f),
 		mRenderStateHelper(game), mIndexCount(0), mTextPosition(0.0f, 40.0f), mAnimationEnabled(false), mOrbitalDistance(orbitRadius), mTextureFilename(texFilename), 
@@ -107,10 +110,18 @@ namespace Rendering
 		mProxyModel->Initialize();
 		mProxyModel->SetPosition(mPointLight.Position());
 
+		mCelestialBodies.resize(NumCelestialBodies);
 
-		mMercury = make_shared<CelestialBodies>(*mGame, mCamera, (.387f * 50.0f), .382f, 1.606f,
-			.0007f, 0.0f, L"Content\\Textures\\MercuryComposite.dds", L"Content\\Textures\\MarsSpecularMap.png", mVSCBufferPerFrame, mVSCBufferPerObject);
-		mMercury->Initialize();
+		for (int i = 0; i < NumCelestialBodies; ++i)
+		{
+			mCelestialBodies[i] = make_shared<CelestialBodies>(*mGame, mCamera, mOrbitRadii[i] * DistanceMultiplier, mScales[i], mOrbitalVelocities[i],
+				mRotationalVelocities[i], mAxialTilts[i], mTextureFilenames[i], mSpecularFilenames, mVSCBufferPerFrame, mVSCBufferPerObject);
+		}
+
+		for (int i = 0; i < NumCelestialBodies; ++i)
+		{
+			mCelestialBodies[i]->Initialize();
+		}
 	}
 
 	void PointLightDemo::Update(const GameTime& gameTime)
@@ -150,7 +161,10 @@ namespace Rendering
 
 		mProxyModel->Update(gameTime);
 
-		mMercury->Update(gameTime);
+		for (int i = 0; i < NumCelestialBodies; ++i)
+		{
+			mCelestialBodies[i]->Update(gameTime);
+		}
 	}
 
 	void PointLightDemo::Draw(const GameTime& gameTime)
@@ -215,8 +229,10 @@ namespace Rendering
 		mSpriteBatch->End();
 		mRenderStateHelper.RestoreAll();
 
-
-		mMercury->Draw(gameTime);
+		for (int i = 0; i < NumCelestialBodies; ++i)
+		{
+			mCelestialBodies[i]->Draw(gameTime);
+		}
 	}
 
 	void PointLightDemo::CreateVertexBuffer(const Mesh& mesh, ID3D11Buffer** vertexBuffer) const

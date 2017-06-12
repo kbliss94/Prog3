@@ -117,6 +117,9 @@ namespace Rendering
 		float mOrbitalAngle;
 		float mAxialTilt;
 
+		static const int NumCelestialBodies = 10;
+		static const float DistanceMultiplier;
+
 		PSCBufferPerFrame mPSCBufferPerFrameData;
 		DirectX::XMFLOAT4X4 mWorldMatrix;
 		VSCBufferPerFrame mVSCBufferPerFrameData;
@@ -143,6 +146,29 @@ namespace Rendering
 		DirectX::XMFLOAT2 mTextPosition;
 		bool mAnimationEnabled;
 
-		std::shared_ptr<CelestialBodies> mMercury;
+		//std::shared_ptr<CelestialBodies> mMercury;
+
+		std::vector<std::shared_ptr<CelestialBodies>> mCelestialBodies;
+
+		std::vector<float> mOrbitRadii = { 0.0f, .387f, .723f, 1.0f, 1.524f, 5.203f, 9.582f, 19.2f, 30.05f, 39.48f };
+		std::vector<float> mScales = { 1.0f, .382f, .949f, 1.0f, .532f, 11.19f, 9.26f, 4.01f, 3.88f, .18f };
+		std::vector<float> mOrbitalVelocities = { 0.0f, 1.606f, 1.174f, 1.0f, .811f, .439f, .326f, .228f, .184f, .159f };
+		std::vector<float> mRotationalVelocities = { 0.0f, .0007f, .0004f, .10f, .0532f, 2.732f, 2.1746f, .5595f, .578f, .0028f };
+		std::vector<float> mAxialTilts = { 0.0f, 0.0f, 3.096f, .410f, .436f, .052f, .471f, 1.709f, .517f, 2.129f };
+		std::vector<std::wstring> mTextureFilenames = 
+		{
+			L"Content\\Textures\\SunComposite.dds",
+			L"Content\\Textures\\MercuryComposite.dds",
+			L"Content\\Textures\\VenusComposite.dds",
+			L"Content\\Textures\\EarthComposite.dds",
+			L"Content\\Textures\\MarsComposite.dds",
+			L"Content\\Textures\\JupiterComposite.dds",
+			L"Content\\Textures\\SaturnComposite.dds",
+			L"Content\\Textures\\UranusComposite.dds",
+			L"Content\\Textures\\NeptuneComposite.dds",
+			L"Content\\Textures\\PlutoComposite.dds"
+		};
+
+		std::wstring mSpecularFilenames = L"Content\\Textures\\MarsSpecularMap.png";
 	};
 }
