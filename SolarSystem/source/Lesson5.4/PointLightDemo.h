@@ -27,7 +27,7 @@ namespace Rendering
 
 	public:
 		//PointLightDemo(Library::Game& game, const std::shared_ptr<Library::Camera>& camera);
-		PointLightDemo(Library::Game& game, const std::shared_ptr<Library::Camera>& camera, float orbitRadius, float scale, std::wstring texFilename, std::wstring specFilename);
+		PointLightDemo(Library::Game& game, const std::shared_ptr<Library::Camera>& camera, float orbitRadius, float scale, float orbPer, float rotPer, std::wstring texFilename, std::wstring specFilename);
 
 		bool AnimationEnabled() const;
 		void SetAnimationEnabled(bool enabled);
@@ -104,10 +104,15 @@ namespace Rendering
 		static const float LightModulationRate;
 		static const float LightMovementRate;
 
-		float mOrbitRadius;
+		float mOrbitalDistance;
 		float mScale;
+		float mOrbitalPeriod;
+		float mRotationalPeriod;
 		std::wstring mTextureFilename;
 		std::wstring mSpecularFilename;
+
+		float mAxialAngle;
+		float mOrbitalAngle;
 
 		PSCBufferPerFrame mPSCBufferPerFrameData;
 		DirectX::XMFLOAT4X4 mWorldMatrix;

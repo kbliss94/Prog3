@@ -9,9 +9,10 @@ namespace Rendering
 	//const XMVECTORF32 RenderingGame::BackgroundColor = Colors::CornflowerBlue;
 	const XMVECTORF32 RenderingGame::BackgroundColor = Colors::Black;
 	const float RenderingGame::DistanceMultiplier = 50.0f;
+	const float RenderingGame::OrbitalPeriodMultipler = 0.1f;
 
 	RenderingGame::RenderingGame(std::function<void*()> getWindowCallback, std::function<void(SIZE&)> getRenderTargetSizeCallback) :
-		Game(getWindowCallback, getRenderTargetSizeCallback), mRenderStateHelper(*this)
+		Game(getWindowCallback, getRenderTargetSizeCallback), mRenderStateHelper(*this), mOrbitalPeriods(), mRotationalPeriods()
 	{
 	}
 
@@ -36,36 +37,43 @@ namespace Rendering
 		mComponents.push_back(mCamera);
 		mServices.AddService(Camera::TypeIdClass(), mCamera.get());
 
-		mGrid = make_shared<Grid>(*this, mCamera);
-		mComponents.push_back(mGrid);
+		//mGrid = make_shared<Grid>(*this, mCamera);
+		//mComponents.push_back(mGrid);
 
-		mMercury = make_shared<PointLightDemo>(*this, mCamera, (.387f * DistanceMultiplier), .382f, L"Content\\Textures\\MercuryComposite.dds", L"Content\\Textures\\MarsSpecularMap.png");
+		mMercury = make_shared<PointLightDemo>(*this, mCamera, (.387f * DistanceMultiplier), .382f, mOrbitalPeriods.Mercury, 
+			mRotationalPeriods.Mercury, mTextureFilenames[0], mSpecularFilenames[1]);
 		mComponents.push_back(mMercury);
 
-		mVenus = make_shared<PointLightDemo>(*this, mCamera, (.723f * DistanceMultiplier), .949f, L"Content\\Textures\\VenusComposite.dds", L"Content\\Textures\\MarsSpecularMap.png");
+		mVenus = make_shared<PointLightDemo>(*this, mCamera, (.723f * DistanceMultiplier), .949f, mOrbitalPeriods.Venus, 
+			mRotationalPeriods.Venus, mTextureFilenames[1], mSpecularFilenames[1]);
 		mComponents.push_back(mVenus);
 
-		mEarth = make_shared<PointLightDemo>(*this, mCamera, (1.0f * DistanceMultiplier), 1.0f, L"Content\\Textures\\EarthComposite.dds", L"Content\\Textures\\EarthSpecularMap.png");
+		mEarth = make_shared<PointLightDemo>(*this, mCamera, (1.0f * DistanceMultiplier), 1.0f, mOrbitalPeriods.Earth, 
+			mRotationalPeriods.Earth, mTextureFilenames[2], mSpecularFilenames[1]);
 		mComponents.push_back(mEarth);
 
-		mMars = make_shared<PointLightDemo>(*this, mCamera, (1.524f * DistanceMultiplier), .532f, L"Content\\Textures\\MarsComposite.dds", L"Content\\Textures\\MarsSpecularMap.png");
+		mMars = make_shared<PointLightDemo>(*this, mCamera, (1.524f * DistanceMultiplier), .532f, mOrbitalPeriods.Mars, 
+			mRotationalPeriods.Mars, mTextureFilenames[3], mSpecularFilenames[1]);
 		mComponents.push_back(mMars);
 
-		//jupiter
-
-		mJupiter = make_shared<PointLightDemo>(*this, mCamera, (5.203f * DistanceMultiplier), 11.19f, L"Content\\Textures\\JupiterComposite.dds", L"Content\\Textures\\MarsSpecularMap.png");
+		mJupiter = make_shared<PointLightDemo>(*this, mCamera, (5.203f * DistanceMultiplier), 11.19f, mOrbitalPeriods.Jupiter, 
+			mRotationalPeriods.Jupiter, mTextureFilenames[4], mSpecularFilenames[1]);
 		mComponents.push_back(mJupiter);
 
-		mSaturn = make_shared<PointLightDemo>(*this, mCamera, (9.582f * DistanceMultiplier), 9.26f, L"Content\\Textures\\SaturnComposite.dds", L"Content\\Textures\\MarsSpecularMap.png");
+		mSaturn = make_shared<PointLightDemo>(*this, mCamera, (9.582f * DistanceMultiplier), 9.26f, mOrbitalPeriods.Saturn, 
+			mRotationalPeriods.Saturn, mTextureFilenames[5], mSpecularFilenames[1]);
 		mComponents.push_back(mSaturn);
 
-		mUranus = make_shared<PointLightDemo>(*this, mCamera, (19.2f * DistanceMultiplier), 4.01f, L"Content\\Textures\\UranusComposite.dds", L"Content\\Textures\\MarsSpecularMap.png");
+		mUranus = make_shared<PointLightDemo>(*this, mCamera, (19.2f * DistanceMultiplier), 4.01f, mOrbitalPeriods.Uranus, 
+			mRotationalPeriods.Uranus, mTextureFilenames[6], mSpecularFilenames[1]);
 		mComponents.push_back(mUranus);
 
-		mNeptune = make_shared<PointLightDemo>(*this, mCamera, (30.05f * DistanceMultiplier), 3.88f, L"Content\\Textures\\NeptuneComposite.dds", L"Content\\Textures\\MarsSpecularMap.png");
+		mNeptune = make_shared<PointLightDemo>(*this, mCamera, (30.05f * DistanceMultiplier), 3.88f, mOrbitalPeriods.Neptune, 
+			mRotationalPeriods.Neptune, mTextureFilenames[7], mSpecularFilenames[1]);
 		mComponents.push_back(mNeptune);
 
-		mPluto = make_shared<PointLightDemo>(*this, mCamera, (39.48f * DistanceMultiplier), .18f, L"Content\\Textures\\PlutoComposite.dds", L"Content\\Textures\\MarsSpecularMap.png");
+		mPluto = make_shared<PointLightDemo>(*this, mCamera, (39.48f * DistanceMultiplier), .18f, mOrbitalPeriods.Pluto, 
+			mRotationalPeriods.Pluto, mTextureFilenames[8], mSpecularFilenames[1]);
 		mComponents.push_back(mPluto);
 
 		Game::Initialize();
@@ -87,8 +95,8 @@ namespace Rendering
 
 		if (mKeyboard->WasKeyPressedThisFrame(Keys::G) || mGamePad->WasButtonPressedThisFrame(GamePadButtons::DPadUp))
 		{
-			mGrid->SetEnabled(!mGrid->Enabled());
-			mGrid->SetVisible(!mGrid->Visible());
+			//mGrid->SetEnabled(!mGrid->Enabled());
+			//mGrid->SetVisible(!mGrid->Visible());
 		}
 
 		Game::Update(gameTime);
