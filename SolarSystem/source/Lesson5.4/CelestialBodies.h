@@ -6,13 +6,11 @@
 #include <DirectXMath.h>
 #include <DirectXColors.h>
 
-#include "CelestialBodies.h"
-
 namespace Library
 {
 	class Mesh;
 	class ProxyModel;
-	class KeyboardComponent;	
+	class KeyboardComponent;
 }
 
 namespace DirectX
@@ -23,13 +21,12 @@ namespace DirectX
 
 namespace Rendering
 {
-	class PointLightDemo final : public Library::DrawableGameComponent
+	class CelestialBodies final : public Library::DrawableGameComponent
 	{
-		RTTI_DECLARATIONS(PointLightDemo, Library::DrawableGameComponent)
+		RTTI_DECLARATIONS(CelestialBodies, Library::DrawableGameComponent)
 
 	public:
-		//PointLightDemo(Library::Game& game, const std::shared_ptr<Library::Camera>& camera);
-		PointLightDemo(Library::Game& game, const std::shared_ptr<Library::Camera>& camera, float orbitRadius, float scale, float orbPer, float rotPer, float axTilt, std::wstring texFilename, std::wstring specFilename);
+		CelestialBodies(Library::Game& game, const std::shared_ptr<Library::Camera>& camera, float orbitRadius, float scale, float orbPer, float rotPer, float axTilt, std::wstring texFilename, std::wstring specFilename);
 
 		bool AnimationEnabled() const;
 		void SetAnimationEnabled(bool enabled);
@@ -98,10 +95,7 @@ namespace Rendering
 
 		void CreateVertexBuffer(const Library::Mesh& mesh, ID3D11Buffer** vertexBuffer) const;
 		void ToggleAnimation();
-		void UpdateAmbientLight(const Library::GameTime& gameTime);
-		void UpdatePointLight(const Library::GameTime& gameTime);
-		void UpdateSpecularLight(const Library::GameTime& gameTime);
-				
+
 		static const float ModelRotationRate;
 		static const float LightModulationRate;
 		static const float LightMovementRate;
@@ -120,9 +114,9 @@ namespace Rendering
 		PSCBufferPerFrame mPSCBufferPerFrameData;
 		DirectX::XMFLOAT4X4 mWorldMatrix;
 		VSCBufferPerFrame mVSCBufferPerFrameData;
-		VSCBufferPerObject mVSCBufferPerObjectData;		
-		PSCBufferPerObject mPSCBufferPerObjectData;		
-		Library::PointLight mPointLight;
+		VSCBufferPerObject mVSCBufferPerObjectData;
+		PSCBufferPerObject mPSCBufferPerObjectData;
+		//Library::PointLight mPointLight;
 		Library::RenderStateHelper mRenderStateHelper;
 		Microsoft::WRL::ComPtr<ID3D11VertexShader> mVertexShader;
 		Microsoft::WRL::ComPtr<ID3D11PixelShader> mPixelShader;
@@ -135,14 +129,12 @@ namespace Rendering
 		Microsoft::WRL::ComPtr<ID3D11Buffer> mPSCBufferPerObject;
 		Microsoft::WRL::ComPtr<ID3D11ShaderResourceView> mColorTexture;
 		Microsoft::WRL::ComPtr<ID3D11ShaderResourceView> mSpecularMap;
-		std::unique_ptr<Library::ProxyModel> mProxyModel;
+		//std::unique_ptr<Library::ProxyModel> mProxyModel;
 		Library::KeyboardComponent* mKeyboard;
 		std::uint32_t mIndexCount;
 		std::unique_ptr<DirectX::SpriteBatch> mSpriteBatch;
 		std::unique_ptr<DirectX::SpriteFont> mSpriteFont;
 		DirectX::XMFLOAT2 mTextPosition;
 		bool mAnimationEnabled;
-
-		CelestialBodies mMercury;
 	};
 }

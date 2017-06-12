@@ -18,6 +18,7 @@ namespace Library
 namespace Rendering
 {
 	class PointLightDemo;
+	class CelestialBodies;
 
 	class RenderingGame final : public Library::Game
 	{
@@ -99,17 +100,18 @@ namespace Rendering
 		std::shared_ptr<Library::Camera> mCamera;
 		//std::shared_ptr<Library::Grid> mGrid;
 
-		std::shared_ptr<PointLightDemo> mMercury;
-		std::shared_ptr<PointLightDemo> mVenus;
-		std::shared_ptr<PointLightDemo> mEarth;
-		std::shared_ptr<PointLightDemo> mMars;
-		std::shared_ptr<PointLightDemo> mJupiter;
-		std::shared_ptr<PointLightDemo> mSaturn;
-		std::shared_ptr<PointLightDemo> mUranus;
-		std::shared_ptr<PointLightDemo> mNeptune;
-		std::shared_ptr<PointLightDemo> mPluto;
-
+		//std::shared_ptr<PointLightDemo> mMercury;
+		//std::shared_ptr<PointLightDemo> mVenus;
+		//std::shared_ptr<PointLightDemo> mEarth;
+		//std::shared_ptr<PointLightDemo> mMars;
+		//std::shared_ptr<PointLightDemo> mJupiter;
+		//std::shared_ptr<PointLightDemo> mSaturn;
+		//std::shared_ptr<PointLightDemo> mUranus;
+		//std::shared_ptr<PointLightDemo> mNeptune;
+		//std::shared_ptr<PointLightDemo> mPluto;
 		std::shared_ptr<PointLightDemo> mSun;
+
+		std::shared_ptr<CelestialBodies> mMercury;
 
 		OrbitalPeriods mOrbitalPeriods;
 		RotationalPeriods mRotationalPeriods;
