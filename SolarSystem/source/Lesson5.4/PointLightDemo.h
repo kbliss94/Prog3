@@ -27,7 +27,7 @@ namespace Rendering
 
 	public:
 		//PointLightDemo(Library::Game& game, const std::shared_ptr<Library::Camera>& camera);
-		PointLightDemo(Library::Game& game, const std::shared_ptr<Library::Camera>& camera, float orbitRadius, float scale, float orbPer, float rotPer, std::wstring texFilename, std::wstring specFilename);
+		PointLightDemo(Library::Game& game, const std::shared_ptr<Library::Camera>& camera, float orbitRadius, float scale, float orbPer, float rotPer, float axTilt, std::wstring texFilename, std::wstring specFilename);
 
 		bool AnimationEnabled() const;
 		void SetAnimationEnabled(bool enabled);
@@ -113,6 +113,7 @@ namespace Rendering
 
 		float mAxialAngle;
 		float mOrbitalAngle;
+		float mAxialTilt;
 
 		PSCBufferPerFrame mPSCBufferPerFrameData;
 		DirectX::XMFLOAT4X4 mWorldMatrix;

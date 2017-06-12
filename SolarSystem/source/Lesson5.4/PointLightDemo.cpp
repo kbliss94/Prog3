@@ -12,10 +12,10 @@ namespace Rendering
 	const float PointLightDemo::LightModulationRate = UCHAR_MAX;
 	const float PointLightDemo::LightMovementRate = 10.0f;
 
-	PointLightDemo::PointLightDemo(Game & game, const shared_ptr<Camera>& camera, float orbitRadius, float scale, float orbPer, float rotPer, wstring texFilename, wstring specFilename) :
+	PointLightDemo::PointLightDemo(Game & game, const shared_ptr<Camera>& camera, float orbitRadius, float scale, float orbPer, float rotPer, float axTilt, wstring texFilename, wstring specFilename) :
 		DrawableGameComponent(game, camera), mWorldMatrix(MatrixHelper::Identity), mPointLight(game, XMFLOAT3(0.0f, 0.0f, 0.0f), 100000.0f), //mPointLight(game, XMFLOAT3(5.0f, 0.0f, 10.0f), 50.0f),
 		mRenderStateHelper(game), mIndexCount(0), mTextPosition(0.0f, 40.0f), mAnimationEnabled(false), mOrbitalDistance(orbitRadius), mTextureFilename(texFilename), 
-		mSpecularFilename(specFilename), mScale(scale), mOrbitalPeriod(orbPer), mRotationalPeriod(rotPer), mAxialAngle(0.0f), mOrbitalAngle(0.0f)
+		mSpecularFilename(specFilename), mScale(scale), mOrbitalPeriod(orbPer), mRotationalPeriod(rotPer), mAxialAngle(0.0f), mOrbitalAngle(0.0f), mAxialTilt(axTilt)
 	{
 	}
 
@@ -110,38 +110,25 @@ namespace Rendering
 
 	void PointLightDemo::Update(const GameTime& gameTime)
 	{
-		//static float angle = 0.0f;
-		static float test = 0.0f;
+		static float angle = 0.0f;
 
 		XMMATRIX matTrans;
 		XMMATRIX matScale;
-
-		//static float axialRate = .1f;
-		//static float orbitalRate = .02f;
 		XMMATRIX matAxialRot;
 		XMMATRIX matOrbitalRot;
+		XMMATRIX matAxialTilt;
 
 		if (mAnimationEnabled)
 		{
-			//angle += gameTime.ElapsedGameTimeSeconds().count() * ModelRotationRate;
-			//XMStoreFloat4x4(&mWorldMatrix, XMMatrixRotationY(angle));
-
-			//angle += gameTime.ElapsedGameTimeSeconds().count() * ModelRotationRate;
-			//matScale = XMMatrixScaling(mScale, mScale, mScale);
-			//matRot = XMMatrixRotationY(angle);
-			//matTrans = XMMatrixTranslation(test, test, mOrbitalDistance);
-			//XMStoreFloat4x4(&mWorldMatrix, (matScale * matTrans * matRot));
-
 			mAxialAngle += gameTime.ElapsedGameTimeSeconds().count() * mRotationalPeriod;
 			mOrbitalAngle += gameTime.ElapsedGameTimeSeconds().count() * mOrbitalPeriod;
 
 			matScale = XMMatrixScaling(mScale, mScale, mScale);
 			matAxialRot = XMMatrixRotationY(mAxialAngle);
+			matAxialTilt = XMMatrixRotationZ(mAxialTilt);
 			matOrbitalRot = XMMatrixRotationY(mOrbitalAngle);
-			matTrans = XMMatrixTranslation(test, test, mOrbitalDistance);
-			XMStoreFloat4x4(&mWorldMatrix, (matScale * matAxialRot * matTrans * matOrbitalRot));
-
-
+			matTrans = XMMatrixTranslation(angle, angle, mOrbitalDistance);
+			XMStoreFloat4x4(&mWorldMatrix, (matScale * matAxialRot * matAxialTilt * matTrans * matOrbitalRot));
 		}
 
 		if (mKeyboard != nullptr)

@@ -34,6 +34,7 @@ namespace Rendering
 	private:
 		const struct OrbitalPeriods
 		{
+			float Sun;
 			float Mercury;
 			float Venus;
 			float Earth;
@@ -45,12 +46,13 @@ namespace Rendering
 			float Pluto;
 
 			OrbitalPeriods() :
-				Mercury(1.606f), Venus(1.174f), Earth(1.0f), Mars(0.811f), Jupiter(0.439f), 
+				Sun(0.0f), Mercury(1.606f), Venus(1.174f), Earth(1.0f), Mars(0.811f), Jupiter(0.439f), 
 				Saturn(0.326f), Uranus(0.228f), Neptune(0.184f), Pluto(0.159f) { }
 		};
 
 		const struct RotationalPeriods
 		{
+			float Sun;
 			float Mercury;
 			float Venus;
 			float Earth;
@@ -62,8 +64,26 @@ namespace Rendering
 			float Pluto;
 
 			RotationalPeriods() :
-				Mercury(.0007f), Venus(.0004f), Earth(.10f), Mars(.0532f), Jupiter(2.732f),
+				Sun(0.0f), Mercury(.0007f), Venus(.0004f), Earth(.10f), Mars(.0532f), Jupiter(2.732f),
 				Saturn(2.1746f), Uranus(.5595f), Neptune(.578f), Pluto(.0028f) { }
+		};
+
+		const struct AxialTilts
+		{
+			float Sun;
+			float Mercury;
+			float Venus;
+			float Earth;
+			float Mars;
+			float Jupiter;
+			float Saturn;
+			float Uranus;
+			float Neptune;
+			float Pluto;
+
+			AxialTilts() :
+				Sun(0.0f), Mercury(0.0f), Venus(3.096f), Earth(0.410f), Mars(0.436f), Jupiter(0.052f),
+				Saturn(0.471f), Uranus(1.709f), Neptune(0.517f), Pluto(2.129f) { }
 		};
 
 		static const DirectX::XMVECTORF32 BackgroundColor;
@@ -89,10 +109,13 @@ namespace Rendering
 		std::shared_ptr<PointLightDemo> mNeptune;
 		std::shared_ptr<PointLightDemo> mPluto;
 
+		std::shared_ptr<PointLightDemo> mSun;
+
 		OrbitalPeriods mOrbitalPeriods;
 		RotationalPeriods mRotationalPeriods;
+		AxialTilts mAxialTilts;
 
-		const std::wstring mTextureFilenames[NumberOfPlanets]
+		const std::wstring mTextureFilenames[NumberOfPlanets + 1]
 		{
 			L"Content\\Textures\\MercuryComposite.dds",
 			L"Content\\Textures\\VenusComposite.dds",
@@ -102,7 +125,8 @@ namespace Rendering
 			L"Content\\Textures\\SaturnComposite.dds",
 			L"Content\\Textures\\UranusComposite.dds",
 			L"Content\\Textures\\NeptuneComposite.dds",
-			L"Content\\Textures\\PlutoComposite.dds"
+			L"Content\\Textures\\PlutoComposite.dds",
+			L"Content\\Textures\\SunComposite.dds"
 		};
 
 		const std::wstring mSpecularFilenames[2]

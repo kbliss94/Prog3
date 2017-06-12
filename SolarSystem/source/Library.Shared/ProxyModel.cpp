@@ -130,13 +130,13 @@ namespace Library
 		ThrowIfFailed(mGame->Direct3DDevice()->CreateBuffer(&constantBufferDesc, nullptr, mVertexCBufferPerObject.ReleaseAndGetAddressOf()), "ID3D11Device::CreateBuffer() failed.");
 
 		// Load a model
-		Model model = Library::Model(mModelFileName);
+		//Model model = Library::Model(mModelFileName);
 
 		// Create vertex and index buffers for the model
-		Mesh* mesh = model.Meshes().at(0).get();
-		CreateVertexBuffer(mGame->Direct3DDevice(), *mesh, mVertexBuffer.GetAddressOf());
-		mesh->CreateIndexBuffer(*mGame->Direct3DDevice(), mIndexBuffer.ReleaseAndGetAddressOf());
-		mIndexCount = static_cast<UINT>(mesh->Indices().size());
+		//Mesh* mesh = model.Meshes().at(0).get();
+		//CreateVertexBuffer(mGame->Direct3DDevice(), *mesh, mVertexBuffer.GetAddressOf());
+		//mesh->CreateIndexBuffer(*mGame->Direct3DDevice(), mIndexBuffer.ReleaseAndGetAddressOf());
+		//mIndexCount = static_cast<UINT>(mesh->Indices().size());
 	}
 
 	void ProxyModel::Update(const GameTime& gameTime)
