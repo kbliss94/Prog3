@@ -95,10 +95,26 @@ namespace Rendering
 				SpecularColor(specularColor), SpecularPower(specularPower) { }
 		};
 
+		struct CelestialBodyData
+		{
+			std::string Name;
+			float OrbitRadius;
+			float Scale;
+			float OrbitalPeriod;
+			float RotationalPeriod;
+			float AxialTilt;
+			std::wstring TextureFilename;
+			std::wstring SpecularFilename;
+			CelestialBodies* Parent;
+
+			CelestialBodyData() = default;
+			CelestialBodyData(const std::string& name, float orbitRad, float scale, float orbPer, float rotPer, float axialTilt, std::wstring texFile, std::wstring specFile, CelestialBodies* parent) :
+				Name(name), OrbitRadius(orbitRad), Scale(scale), OrbitalPeriod(orbPer), RotationalPeriod(rotPer), AxialTilt(axialTilt), TextureFilename(texFile),
+				SpecularFilename(specFile), Parent(parent) { };
+		};
+
 		void CreateVertexBuffer(const Library::Mesh& mesh, ID3D11Buffer** vertexBuffer) const;
 		void ToggleAnimation();
-		void UpdatePointLight(const Library::GameTime& gameTime);
-		void UpdateSpecularLight(const Library::GameTime& gameTime);
 				
 		static const float LightModulationRate;
 		static const float LightMovementRate;
@@ -147,24 +163,6 @@ namespace Rendering
 		std::unique_ptr<DirectX::SpriteFont> mSpriteFont;
 		DirectX::XMFLOAT2 mTextPosition;
 		bool mAnimationEnabled;
-
-		struct CelestialBodyData
-		{
-			std::string Name;
-			float OrbitRadius;
-			float Scale;
-			float OrbitalPeriod;
-			float RotationalPeriod;
-			float AxialTilt;
-			std::wstring TextureFilename;
-			std::wstring SpecularFilename;
-			CelestialBodies* Parent;
-
-			CelestialBodyData() = default;
-			CelestialBodyData(const std::string& name, float orbitRad, float scale, float orbPer, float rotPer, float axialTilt, std::wstring texFile, std::wstring specFile, CelestialBodies* parent) :
-				Name(name), OrbitRadius(orbitRad), Scale(scale), OrbitalPeriod(orbPer), RotationalPeriod(rotPer), AxialTilt(axialTilt), TextureFilename(texFile),
-				SpecularFilename(specFile), Parent(parent) { };
-		};
 
 		std::vector<std::shared_ptr<CelestialBodies>> mCelestialBodies;
 		std::vector<std::shared_ptr<CelestialBodyData>> mCelestialBodyDataList;

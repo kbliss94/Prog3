@@ -14,8 +14,8 @@ namespace Rendering
 		std::shared_ptr<CelestialBodies> parent) :
 		DrawableGameComponent(game, camera), mWorldMatrix(MatrixHelper::Identity), mRenderStateHelper(game), mIndexCount(0),
 		mAnimationEnabled(false), mOrbitalDistance(orbitRadius), mTextureFilename(texFilename), mSpecularFilename(specFilename), mScale(scale), 
-		mOrbitalPeriod(orbPer), mRotationalPeriod(rotPer), mAxialAngle(0.0f), mOrbitalAngle(0.0f), mAxialTilt(axTilt), 
-		mVSCBufferPerFrame(frameBuffer), mVSCBufferPerObject(objectBuffer), mParent(parent)
+		mOrbitalPeriod(orbPer), mRotationalPeriod(rotPer), mAxialDisplacement(0.0f), mOrbitalDisplacement(0.0f), mAxialTilt(axTilt), 
+		mVSCBufferPerFrame(frameBuffer), mVSCBufferPerObject(objectBuffer), mParent(parent), OrbitalSpeedFactor(0.1f), RotationalSpeedFactor(.001f)
 	{
 	}
 
@@ -86,25 +86,25 @@ namespace Rendering
 		{
 			if (mParent == nullptr)
 			{
-				mAxialAngle += gameTime.ElapsedGameTimeSeconds().count() * (1 / mRotationalPeriod) * RotationalSpeedFactor;
-				mOrbitalAngle += gameTime.ElapsedGameTimeSeconds().count() * (1 / mOrbitalPeriod) * OrbitalSpeedFactor;
+				mAxialDisplacement += gameTime.ElapsedGameTimeSeconds().count() * (1 / mRotationalPeriod) * RotationalSpeedFactor;
+				mOrbitalDisplacement += gameTime.ElapsedGameTimeSeconds().count() * (1 / mOrbitalPeriod) * OrbitalSpeedFactor;
 
 				matScale = XMMatrixScaling(mScale, mScale, mScale);
-				matAxialRot = XMMatrixRotationY(mAxialAngle);
+				matAxialRot = XMMatrixRotationY(mAxialDisplacement);
 				matAxialTilt = XMMatrixRotationZ(mAxialTilt);
-				matOrbitalRot = XMMatrixRotationY(mOrbitalAngle);
+				matOrbitalRot = XMMatrixRotationY(mOrbitalDisplacement);
 				matTrans = XMMatrixTranslation(angle, angle, mOrbitalDistance);
 				XMStoreFloat4x4(&mWorldMatrix, (matScale * matAxialRot * matAxialTilt * matTrans * matOrbitalRot));
 			}
 			else
 			{
-				mAxialAngle += gameTime.ElapsedGameTimeSeconds().count() * (1 / mRotationalPeriod) * RotationalSpeedFactor;
-				mOrbitalAngle += gameTime.ElapsedGameTimeSeconds().count() * (1 / mOrbitalPeriod) * OrbitalSpeedFactor;
+				mAxialDisplacement += gameTime.ElapsedGameTimeSeconds().count() * (1 / mRotationalPeriod) * RotationalSpeedFactor;
+				mOrbitalDisplacement += gameTime.ElapsedGameTimeSeconds().count() * (1 / mOrbitalPeriod) * OrbitalSpeedFactor;
 
 				matScale = XMMatrixScaling(mScale, mScale, mScale);
-				matAxialRot = XMMatrixRotationY(mAxialAngle);
+				matAxialRot = XMMatrixRotationY(mAxialDisplacement);
 				matAxialTilt = XMMatrixRotationZ(mAxialTilt);
-				matOrbitalRot = XMMatrixRotationY(mOrbitalAngle);
+				matOrbitalRot = XMMatrixRotationY(mOrbitalDisplacement);
 				matTrans = XMMatrixTranslation(angle, angle, mOrbitalDistance);
 
 				XMMATRIX parentMatrix = XMLoadFloat4x4(&mParent->mWorldMatrix);
@@ -118,6 +118,21 @@ namespace Rendering
 			if (mKeyboard->WasKeyPressedThisFrame(Keys::Space))
 			{
 				ToggleAnimation();
+			}
+
+			if (mKeyboard->WasKeyPressedThisFrame(Keys::R))
+			{
+				RotationalSpeedFactor += .001f;
+				OrbitalSpeedFactor += 0.1f;
+			}
+
+			if (mKeyboard->WasKeyPressedThisFrame(Keys::E))
+			{
+				if ((RotationalSpeedFactor - .001f) > 0 && (OrbitalSpeedFactor - 0.1f) > 0)
+				{
+					RotationalSpeedFactor -= .001f;
+					OrbitalSpeedFactor -= 0.1f;
+				}
 			}
 		}
 	}

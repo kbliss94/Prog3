@@ -98,16 +98,20 @@ namespace Rendering
 		void CreateVertexBuffer(const Library::Mesh& mesh, ID3D11Buffer** vertexBuffer) const;
 		void ToggleAnimation();
 
+		std::shared_ptr<CelestialBodies> mParent;
+
 		float mOrbitalDistance;
 		float mScale;
 		float mOrbitalPeriod;
 		float mRotationalPeriod;
+		float mAxialTilt;
 		std::wstring mTextureFilename;
 		std::wstring mSpecularFilename;
 
-		float mAxialAngle;
-		float mOrbitalAngle;
-		float mAxialTilt;
+		float mAxialDisplacement;
+		float mOrbitalDisplacement;
+		float OrbitalSpeedFactor;
+		float RotationalSpeedFactor;
 
 		DirectX::XMFLOAT4X4 mWorldMatrix;
 		VSCBufferPerFrame mVSCBufferPerFrameData;
@@ -125,10 +129,5 @@ namespace Rendering
 		Library::KeyboardComponent* mKeyboard;
 		std::uint32_t mIndexCount;
 		bool mAnimationEnabled;
-
-		std::shared_ptr<CelestialBodies> mParent;
-
-		const float OrbitalSpeedFactor = 0.1f;
-		const float RotationalSpeedFactor = .001f;
 	};
 }

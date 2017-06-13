@@ -48,7 +48,6 @@ namespace Rendering
 		std::shared_ptr<Library::GamePadComponent> mGamePad;
 		std::shared_ptr<Library::FpsComponent> mFpsComponent;
 		std::shared_ptr<Library::Camera> mCamera;
-
 		std::shared_ptr<PointLightDemo> mSolarSystem;
 
 		const std::wstring mSunTextureFilename = L"Content\\Textures\\SunComposite.dds";

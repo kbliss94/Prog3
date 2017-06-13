@@ -35,17 +35,6 @@ namespace Rendering
 
 	void PointLightDemo::Initialize()
 	{
-		mCelestialBodyDataList.push_back(make_shared<CelestialBodyData>(Mercury));
-		mCelestialBodyDataList.push_back(make_shared<CelestialBodyData>(Venus));
-		mCelestialBodyDataList.push_back(make_shared<CelestialBodyData>(Earth));
-		mCelestialBodyDataList.push_back(make_shared<CelestialBodyData>(Mars));
-		mCelestialBodyDataList.push_back(make_shared<CelestialBodyData>(Jupiter));
-		mCelestialBodyDataList.push_back(make_shared<CelestialBodyData>(Saturn));
-		mCelestialBodyDataList.push_back(make_shared<CelestialBodyData>(Uranus));
-		mCelestialBodyDataList.push_back(make_shared<CelestialBodyData>(Neptune));
-		mCelestialBodyDataList.push_back(make_shared<CelestialBodyData>(Pluto));
-		mCelestialBodyDataList.push_back(make_shared<CelestialBodyData>(Moon));
-
 		// Load a compiled vertex shader
 		vector<char> compiledVertexShader;
 		Utility::LoadBinaryFile(L"Content\\Shaders\\PointLightDemoVS.cso", compiledVertexShader);
@@ -116,6 +105,18 @@ namespace Rendering
 		mProxyModel->Initialize();
 		mProxyModel->SetPosition(mPointLight.Position());
 
+		// Initializing celestial body data for each of the planets & Earth's moon
+		mCelestialBodyDataList.push_back(make_shared<CelestialBodyData>(Mercury));
+		mCelestialBodyDataList.push_back(make_shared<CelestialBodyData>(Venus));
+		mCelestialBodyDataList.push_back(make_shared<CelestialBodyData>(Earth));
+		mCelestialBodyDataList.push_back(make_shared<CelestialBodyData>(Mars));
+		mCelestialBodyDataList.push_back(make_shared<CelestialBodyData>(Jupiter));
+		mCelestialBodyDataList.push_back(make_shared<CelestialBodyData>(Saturn));
+		mCelestialBodyDataList.push_back(make_shared<CelestialBodyData>(Uranus));
+		mCelestialBodyDataList.push_back(make_shared<CelestialBodyData>(Neptune));
+		mCelestialBodyDataList.push_back(make_shared<CelestialBodyData>(Pluto));
+		mCelestialBodyDataList.push_back(make_shared<CelestialBodyData>(Moon));
+
 		mCelestialBodies.resize(NumCelestialBodies);
 
 		for (int i = 0; i < NumCelestialBodies; ++i)
@@ -169,9 +170,6 @@ namespace Rendering
 			{
 				ToggleAnimation();
 			}
-
-			UpdatePointLight(gameTime);
-			UpdateSpecularLight(gameTime);
 		}
 
 		mProxyModel->Update(gameTime);
@@ -234,6 +232,7 @@ namespace Rendering
 		mSpriteBatch->Begin();
 
 		wostringstream helpLabel;
+		helpLabel << L"Decrease/Increase Rotational & Orbital Velocities (E/R)" << "\n";
 		helpLabel << L"Reset Camera to Center of Solar System (Q)" << "\n";
 		helpLabel << L"Camera Controls (WASD + Left Mouse)" << "\n";
 		helpLabel << L"Toggle Animation (Space)" << "\n";
@@ -281,154 +280,5 @@ namespace Rendering
 	void PointLightDemo::ToggleAnimation()
 	{
 		mAnimationEnabled = !mAnimationEnabled;
-	}
-
-	void PointLightDemo::UpdatePointLight(const GameTime& gameTime)
-	{
-		static float lightIntensity = mPSCBufferPerFrameData.LightColor.x;
-
-		assert(mKeyboard != nullptr);
-
-		float elapsedTime = gameTime.ElapsedGameTimeSeconds().count();
-		bool updateCBuffer = false;
-
-		// Update point light intensity
-		if (mKeyboard->IsKeyDown(Keys::Home) && lightIntensity < 1.0f)
-		{
-			lightIntensity += elapsedTime;
-			lightIntensity = min(lightIntensity, 1.0f);
-
-			mPSCBufferPerFrameData.LightColor = XMFLOAT3(lightIntensity, lightIntensity, lightIntensity);
-			mPointLight.SetColor(mPSCBufferPerFrameData.LightColor.x, mPSCBufferPerFrameData.LightColor.y, mPSCBufferPerFrameData.LightColor.z, 1.0f);
-			updateCBuffer = true;
-		}
-		else if (mKeyboard->IsKeyDown(Keys::End) && lightIntensity > 0.0f)
-		{
-			lightIntensity -= elapsedTime;
-			lightIntensity = max(lightIntensity, 0.0f);
-
-			mPSCBufferPerFrameData.LightColor = XMFLOAT3(lightIntensity, lightIntensity, lightIntensity);
-			mPointLight.SetColor(mPSCBufferPerFrameData.LightColor.x, mPSCBufferPerFrameData.LightColor.y, mPSCBufferPerFrameData.LightColor.z, 1.0f);
-			updateCBuffer = true;
-		}
-
-		// Move point light
-		XMFLOAT3 movementAmount = Vector3Helper::Zero;
-		if (mKeyboard != nullptr)
-		{
-			if (mKeyboard->IsKeyDown(Keys::NumPad4))
-			{
-				movementAmount.x = -1.0f;
-			}
-
-			if (mKeyboard->IsKeyDown(Keys::NumPad6))
-			{
-				movementAmount.x = 1.0f;
-			}
-
-			if (mKeyboard->IsKeyDown(Keys::NumPad9))
-			{
-				movementAmount.y = 1.0f;
-			}
-
-			if (mKeyboard->IsKeyDown(Keys::NumPad3))
-			{
-				movementAmount.y = -1.0f;
-			}
-
-			if (mKeyboard->IsKeyDown(Keys::NumPad8))
-			{
-				movementAmount.z = -1.0f;
-			}
-
-			if (mKeyboard->IsKeyDown(Keys::NumPad2))
-			{
-				movementAmount.z = 1.0f;
-			}
-		}
-
-		if (movementAmount.x != 0.0f || movementAmount.y != 0.0f || movementAmount.z != 0.0f)
-		{
-			XMVECTOR movement = XMLoadFloat3(&movementAmount) * LightMovementRate * elapsedTime;
-			mPointLight.SetPosition(mPointLight.PositionVector() + movement);
-			mProxyModel->SetPosition(mPointLight.Position());
-			mVSCBufferPerFrameData.LightPosition = mPointLight.Position();
-			mPSCBufferPerFrameData.LightPosition = mPointLight.Position();
-			updateCBuffer = true;
-		}
-
-		// Update the light's radius
-		if (mKeyboard->IsKeyDown(Keys::V))
-		{
-			float radius = mPointLight.Radius() + LightModulationRate * elapsedTime;
-			mPointLight.SetRadius(radius);
-			mVSCBufferPerFrameData.LightRadius = mPointLight.Radius();
-			updateCBuffer = true;
-		}
-
-		if (mKeyboard->IsKeyDown(Keys::B))
-		{
-			float radius = mPointLight.Radius() - LightModulationRate * elapsedTime;
-			radius = max(radius, 0.0f);
-			mPointLight.SetRadius(radius);
-			mVSCBufferPerFrameData.LightRadius = mPointLight.Radius();
-			updateCBuffer = true;
-		}
-
-		if (updateCBuffer)
-		{			
-			mGame->Direct3DDeviceContext()->UpdateSubresource(mVSCBufferPerFrame.Get(), 0, nullptr, &mVSCBufferPerFrameData, 0, 0);
-			mGame->Direct3DDeviceContext()->UpdateSubresource(mPSCBufferPerFrame.Get(), 0, nullptr, &mPSCBufferPerFrameData, 0, 0);
-		}
-	}
-
-	void PointLightDemo::UpdateSpecularLight(const GameTime& gameTime)
-	{
-		static float specularIntensity = mPSCBufferPerObjectData.SpecularColor.x;
-
-		bool updateCBuffer = false;
-
-		if (mKeyboard->IsKeyDown(Keys::Insert) && specularIntensity < 1.0f)
-		{
-			specularIntensity += gameTime.ElapsedGameTimeSeconds().count();
-			specularIntensity = min(specularIntensity, 1.0f);
-
-			mPSCBufferPerObjectData.SpecularColor = XMFLOAT3(specularIntensity, specularIntensity, specularIntensity);
-			updateCBuffer = true;
-		}
-
-		if (mKeyboard->IsKeyDown(Keys::Delete) && specularIntensity > 0.0f)
-		{
-			specularIntensity -= gameTime.ElapsedGameTimeSeconds().count();
-			specularIntensity = max(specularIntensity, 0.0f);
-
-			mPSCBufferPerObjectData.SpecularColor = XMFLOAT3(specularIntensity, specularIntensity, specularIntensity);
-			updateCBuffer = true;
-		}
-
-		static float specularPower = mPSCBufferPerObjectData.SpecularPower;
-
-		if (mKeyboard->IsKeyDown(Keys::O) && specularPower < UCHAR_MAX)
-		{
-			specularPower += LightModulationRate * gameTime.ElapsedGameTimeSeconds().count();
-			specularPower = min(specularPower, static_cast<float>(UCHAR_MAX));
-
-			mPSCBufferPerObjectData.SpecularPower = specularPower;
-			updateCBuffer = true;
-		}
-
-		if (mKeyboard->IsKeyDown(Keys::P) && specularPower > 1.0f)
-		{
-			specularPower -= LightModulationRate * gameTime.ElapsedGameTimeSeconds().count();
-			specularPower = max(specularPower, 1.0f);
-
-			mPSCBufferPerObjectData.SpecularPower = specularPower;
-			updateCBuffer = true;
-		}
-
-		if (updateCBuffer)
-		{
-			mGame->Direct3DDeviceContext()->UpdateSubresource(mPSCBufferPerObject.Get(), 0, nullptr, &mPSCBufferPerObjectData, 0, 0);
-		}
 	}
 }
