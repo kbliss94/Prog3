@@ -6,16 +6,16 @@ using namespace DirectX;
 
 namespace Rendering
 {
-	RTTI_DEFINITIONS(PointLightDemo)
+	RTTI_DEFINITIONS(SolarSystem)
 
-	const float PointLightDemo::LightModulationRate = UCHAR_MAX;
-	const float PointLightDemo::LightMovementRate = 10.0f;
-	const float PointLightDemo::SunAmbientColor = 0.8f;
-	const float PointLightDemo::PlanetAmbientColor = 0.0f;
-	const float PointLightDemo::DistanceMultiplier = 50.0f;
-	const float PointLightDemo::SpeedFactor = .1f;
+	const float SolarSystem::LightModulationRate = UCHAR_MAX;
+	const float SolarSystem::LightMovementRate = 10.0f;
+	const float SolarSystem::SunAmbientColor = 0.8f;
+	const float SolarSystem::PlanetAmbientColor = 0.0f;
+	const float SolarSystem::DistanceMultiplier = 50.0f;
+	const float SolarSystem::SpeedFactor = .1f;
 
-	PointLightDemo::PointLightDemo(Game & game, const shared_ptr<Camera>& camera, float orbitRadius, float scale, float orbPer, float rotPer, float axTilt, wstring texFilename, wstring specFilename) :
+	SolarSystem::SolarSystem(Game & game, const shared_ptr<Camera>& camera, float orbitRadius, float scale, float orbPer, float rotPer, float axTilt, wstring texFilename, wstring specFilename) :
 		DrawableGameComponent(game, camera), mWorldMatrix(MatrixHelper::Identity), mPointLight(game, XMFLOAT3(0.0f, 0.0f, 0.0f), 100000.0f), mRenderStateHelper(game), mIndexCount(0), 
 		mTextPosition(0.0f, 40.0f), mAnimationEnabled(false), mOrbitalDistance(orbitRadius), mTextureFilename(texFilename), mSpecularFilename(specFilename), mScale(scale), 
 		mOrbitalPeriod(orbPer), mRotationalPeriod(rotPer), mAxialAngle(0.0f), mOrbitalAngle(0.0f), mAxialTilt(axTilt)
@@ -23,17 +23,17 @@ namespace Rendering
 
 	}
 
-	bool PointLightDemo::AnimationEnabled() const
+	bool SolarSystem::AnimationEnabled() const
 	{
 		return mAnimationEnabled;
 	}
 
-	void PointLightDemo::SetAnimationEnabled(bool enabled)
+	void SolarSystem::SetAnimationEnabled(bool enabled)
 	{
 		mAnimationEnabled = enabled;
 	}
 
-	void PointLightDemo::Initialize()
+	void SolarSystem::Initialize()
 	{
 		// Load a compiled vertex shader
 		vector<char> compiledVertexShader;
@@ -141,7 +141,7 @@ namespace Rendering
 		}
 	}
 
-	void PointLightDemo::Update(const GameTime& gameTime)
+	void SolarSystem::Update(const GameTime& gameTime)
 	{
 		static float angle = 0.0f;
 
@@ -180,7 +180,7 @@ namespace Rendering
 		}
 	}
 
-	void PointLightDemo::Draw(const GameTime& gameTime)
+	void SolarSystem::Draw(const GameTime& gameTime)
 	{
 		mPSCBufferPerFrameData.AmbientColor = XMFLOAT3(SunAmbientColor, SunAmbientColor, SunAmbientColor);
 		mGame->Direct3DDeviceContext()->UpdateSubresource(mPSCBufferPerFrame.Get(), 0, nullptr, &mPSCBufferPerFrameData, 0, 0);
@@ -251,7 +251,7 @@ namespace Rendering
 		}
 	}
 
-	void PointLightDemo::CreateVertexBuffer(const Mesh& mesh, ID3D11Buffer** vertexBuffer) const
+	void SolarSystem::CreateVertexBuffer(const Mesh& mesh, ID3D11Buffer** vertexBuffer) const
 	{
 		const vector<XMFLOAT3>& sourceVertices = mesh.Vertices();
 		const vector<XMFLOAT3>& sourceNormals = mesh.Normals();
@@ -277,7 +277,7 @@ namespace Rendering
 		ThrowIfFailed(mGame->Direct3DDevice()->CreateBuffer(&vertexBufferDesc, &vertexSubResourceData, vertexBuffer), "ID3D11Device::CreateBuffer() failed.");
 	}
 
-	void PointLightDemo::ToggleAnimation()
+	void SolarSystem::ToggleAnimation()
 	{
 		mAnimationEnabled = !mAnimationEnabled;
 	}

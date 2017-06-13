@@ -5,7 +5,6 @@
 #include "PointLight.h"
 #include <DirectXMath.h>
 #include <DirectXColors.h>
-
 #include "CelestialBodies.h"
 
 namespace Library
@@ -23,12 +22,12 @@ namespace DirectX
 
 namespace Rendering
 {
-	class PointLightDemo final : public Library::DrawableGameComponent
+	class SolarSystem final : public Library::DrawableGameComponent
 	{
-		RTTI_DECLARATIONS(PointLightDemo, Library::DrawableGameComponent)
+		RTTI_DECLARATIONS(SolarSystem, Library::DrawableGameComponent)
 
 	public:
-		PointLightDemo(Library::Game& game, const std::shared_ptr<Library::Camera>& camera, float orbitRadius, float scale, float orbPer, float rotPer, float axTilt, std::wstring texFilename, std::wstring specFilename);
+		SolarSystem(Library::Game& game, const std::shared_ptr<Library::Camera>& camera, float orbitRadius, float scale, float orbPer, float rotPer, float axTilt, std::wstring texFilename, std::wstring specFilename);
 
 		bool AnimationEnabled() const;
 		void SetAnimationEnabled(bool enabled);

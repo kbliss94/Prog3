@@ -17,7 +17,7 @@ namespace Library
 
 namespace Rendering
 {
-	class PointLightDemo;
+	class SolarSystem;
 	class CelestialBodies;
 
 	class RenderingGame final : public Library::Game
@@ -48,7 +48,7 @@ namespace Rendering
 		std::shared_ptr<Library::GamePadComponent> mGamePad;
 		std::shared_ptr<Library::FpsComponent> mFpsComponent;
 		std::shared_ptr<Library::Camera> mCamera;
-		std::shared_ptr<PointLightDemo> mSolarSystem;
+		std::shared_ptr<SolarSystem> mSolarSystem;
 
 		const std::wstring mSunTextureFilename = L"Content\\Textures\\SunComposite.dds";
 		const std::wstring mSunSpecularFilename = L"Content\\Textures\\MarsSpecularMap.png";

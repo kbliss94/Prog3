@@ -36,7 +36,7 @@ namespace Rendering
 		mComponents.push_back(mCamera);
 		mServices.AddService(Camera::TypeIdClass(), mCamera.get());
 
-		mSolarSystem = make_shared<PointLightDemo>(*this, mCamera, 0.0f, 1.0f, SunOrbitalVelocity,
+		mSolarSystem = make_shared<SolarSystem>(*this, mCamera, 0.0f, 1.0f, SunOrbitalVelocity,
 			SunRotationalVelocity, SunAxialTilt, mSunTextureFilename, mSunSpecularFilename);
 		mComponents.push_back(mSolarSystem);
 
