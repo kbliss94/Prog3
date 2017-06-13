@@ -13,12 +13,14 @@ namespace Rendering
 	const float PointLightDemo::SunAmbientColor = 0.8f;
 	const float PointLightDemo::PlanetAmbientColor = 0.0f;
 	const float PointLightDemo::DistanceMultiplier = 50.0f;
+	const float PointLightDemo::SpeedFactor = .1f;
 
 	PointLightDemo::PointLightDemo(Game & game, const shared_ptr<Camera>& camera, float orbitRadius, float scale, float orbPer, float rotPer, float axTilt, wstring texFilename, wstring specFilename) :
-		DrawableGameComponent(game, camera), mWorldMatrix(MatrixHelper::Identity), mPointLight(game, XMFLOAT3(0.0f, 0.0f, 0.0f), 100000.0f), //mPointLight(game, XMFLOAT3(5.0f, 0.0f, 10.0f), 50.0f),
-		mRenderStateHelper(game), mIndexCount(0), mTextPosition(0.0f, 40.0f), mAnimationEnabled(false), mOrbitalDistance(orbitRadius), mTextureFilename(texFilename), 
-		mSpecularFilename(specFilename), mScale(scale), mOrbitalPeriod(orbPer), mRotationalPeriod(rotPer), mAxialAngle(0.0f), mOrbitalAngle(0.0f), mAxialTilt(axTilt)
+		DrawableGameComponent(game, camera), mWorldMatrix(MatrixHelper::Identity), mPointLight(game, XMFLOAT3(0.0f, 0.0f, 0.0f), 100000.0f), mRenderStateHelper(game), mIndexCount(0), 
+		mTextPosition(0.0f, 40.0f), mAnimationEnabled(false), mOrbitalDistance(orbitRadius), mTextureFilename(texFilename), mSpecularFilename(specFilename), mScale(scale), 
+		mOrbitalPeriod(orbPer), mRotationalPeriod(rotPer), mAxialAngle(0.0f), mOrbitalAngle(0.0f), mAxialTilt(axTilt)
 	{
+
 	}
 
 	bool PointLightDemo::AnimationEnabled() const
@@ -33,6 +35,17 @@ namespace Rendering
 
 	void PointLightDemo::Initialize()
 	{
+		mCelestialBodyDataList.push_back(make_shared<CelestialBodyData>(Mercury));
+		mCelestialBodyDataList.push_back(make_shared<CelestialBodyData>(Venus));
+		mCelestialBodyDataList.push_back(make_shared<CelestialBodyData>(Earth));
+		mCelestialBodyDataList.push_back(make_shared<CelestialBodyData>(Mars));
+		mCelestialBodyDataList.push_back(make_shared<CelestialBodyData>(Jupiter));
+		mCelestialBodyDataList.push_back(make_shared<CelestialBodyData>(Saturn));
+		mCelestialBodyDataList.push_back(make_shared<CelestialBodyData>(Uranus));
+		mCelestialBodyDataList.push_back(make_shared<CelestialBodyData>(Neptune));
+		mCelestialBodyDataList.push_back(make_shared<CelestialBodyData>(Pluto));
+		mCelestialBodyDataList.push_back(make_shared<CelestialBodyData>(Moon));
+
 		// Load a compiled vertex shader
 		vector<char> compiledVertexShader;
 		Utility::LoadBinaryFile(L"Content\\Shaders\\PointLightDemoVS.cso", compiledVertexShader);
@@ -105,16 +118,21 @@ namespace Rendering
 
 		mCelestialBodies.resize(NumCelestialBodies);
 
-		for (int i = 0; i < NumCelestialBodies - 1; ++i)
+		for (int i = 0; i < NumCelestialBodies; ++i)
 		{
-			mCelestialBodies[i] = make_shared<CelestialBodies>(*mGame, mCamera, mOrbitRadii[i] * DistanceMultiplier, mScales[i], mOrbitalVelocities[i],
-				mRotationalVelocities[i], mAxialTilts[i], mTextureFilenames[i], mSpecularFilenames, mVSCBufferPerFrame, mVSCBufferPerObject);
+			if (i == NumCelestialBodies - 1)
+			{
+				mCelestialBodies[i] = make_shared<CelestialBodies>(*mGame, mCamera, mCelestialBodyDataList[i]->OrbitRadius * DistanceMultiplier, mCelestialBodyDataList[i]->Scale,
+					mCelestialBodyDataList[i]->OrbitalPeriod, mCelestialBodyDataList[i]->RotationalPeriod, mCelestialBodyDataList[i]->AxialTilt,
+					mCelestialBodyDataList[i]->TextureFilename, mCelestialBodyDataList[i]->SpecularFilename, mVSCBufferPerFrame, mVSCBufferPerObject, mCelestialBodies[EarthIndex]);
+			}
+			else
+			{
+				mCelestialBodies[i] = make_shared<CelestialBodies>(*mGame, mCamera, mCelestialBodyDataList[i]->OrbitRadius * DistanceMultiplier, mCelestialBodyDataList[i]->Scale,
+					mCelestialBodyDataList[i]->OrbitalPeriod, mCelestialBodyDataList[i]->RotationalPeriod, mCelestialBodyDataList[i]->AxialTilt,
+					mCelestialBodyDataList[i]->TextureFilename, mCelestialBodyDataList[i]->SpecularFilename, mVSCBufferPerFrame, mVSCBufferPerObject);
+			}
 		}
-
-		// Initializing the moon
-		mCelestialBodies[MoonIndex] = make_shared<CelestialBodies>(*mGame, mCamera, mOrbitRadii[MoonIndex] * DistanceMultiplier, mScales[MoonIndex],
-			mOrbitalVelocities[MoonIndex], mRotationalVelocities[MoonIndex], mAxialTilts[MoonIndex], mTextureFilenames[MoonIndex], mSpecularFilenames, mVSCBufferPerFrame, mVSCBufferPerObject,
-			mCelestialBodies[EarthIndex]);
 
 		for (int i = 0; i < NumCelestialBodies; ++i)
 		{
@@ -152,7 +170,6 @@ namespace Rendering
 				ToggleAnimation();
 			}
 
-			UpdateAmbientLight(gameTime);
 			UpdatePointLight(gameTime);
 			UpdateSpecularLight(gameTime);
 		}
@@ -217,14 +234,10 @@ namespace Rendering
 		mSpriteBatch->Begin();
 
 		wostringstream helpLabel;
-		//helpLabel << "Ambient Intensity (+PgUp/-PgDn): " << mPSCBufferPerFrameData.AmbientColor.x << "\n";
-		//helpLabel << L"Specular Intensity (+Insert/-Delete): " << mPSCBufferPerObjectData.SpecularColor.x << "\n";
-		//helpLabel << L"Specular Power (+O/-P): " << mPSCBufferPerObjectData.SpecularPower << "\n";
-		//helpLabel << L"Point Light Intensity (+Home/-End): " << mPSCBufferPerFrameData.LightColor.x << "\n";
-		//helpLabel << L"Point Light Radius (+V/-B): " << mVSCBufferPerFrameData.LightRadius << "\n";
-		//helpLabel << L"Move Point Light (8/2, 4/6, 3/9)" << "\n";
-		//helpLabel << L"Toggle Grid (G)" << "\n";
-		//helpLabel << L"Toggle Animation (Space)" << "\n";
+		helpLabel << L"Reset Camera to Center of Solar System (Q)" << "\n";
+		helpLabel << L"Camera Controls (WASD + Left Mouse)" << "\n";
+		helpLabel << L"Toggle Animation (Space)" << "\n";
+		helpLabel << L"Exit (Esc)" << "\n";
 	
 		mSpriteFont->DrawString(mSpriteBatch.get(), helpLabel.str().c_str(), mTextPosition);
 		mSpriteBatch->End();
@@ -268,32 +281,6 @@ namespace Rendering
 	void PointLightDemo::ToggleAnimation()
 	{
 		mAnimationEnabled = !mAnimationEnabled;
-	}
-
-	void PointLightDemo::UpdateAmbientLight(const GameTime& gameTime)
-	{
-		gameTime;
-
-		//static float ambientIntensity = mPSCBufferPerFrameData.AmbientColor.x;
-
-		//assert(mKeyboard != nullptr);
-
-		//if (mKeyboard->IsKeyDown(Keys::PageUp) && ambientIntensity < 1.0f)
-		//{
-		//	ambientIntensity += gameTime.ElapsedGameTimeSeconds().count();
-		//	ambientIntensity = min(ambientIntensity, 1.0f);
-
-		//	mPSCBufferPerFrameData.AmbientColor = XMFLOAT3(ambientIntensity, ambientIntensity, ambientIntensity);
-		//	mGame->Direct3DDeviceContext()->UpdateSubresource(mPSCBufferPerFrame.Get(), 0, nullptr, &mPSCBufferPerFrameData, 0, 0);
-		//}
-		//else if (mKeyboard->IsKeyDown(Keys::PageDown) && ambientIntensity > 0.0f)
-		//{
-		//	ambientIntensity -= gameTime.ElapsedGameTimeSeconds().count();
-		//	ambientIntensity = max(ambientIntensity, 0.0f);
-
-		//	mPSCBufferPerFrameData.AmbientColor = XMFLOAT3(ambientIntensity, ambientIntensity, ambientIntensity);
-		//	mGame->Direct3DDeviceContext()->UpdateSubresource(mPSCBufferPerFrame.Get(), 0, nullptr, &mPSCBufferPerFrameData, 0, 0);
-		//}
 	}
 
 	void PointLightDemo::UpdatePointLight(const GameTime& gameTime)

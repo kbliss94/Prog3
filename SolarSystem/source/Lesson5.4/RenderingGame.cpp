@@ -6,7 +6,6 @@ using namespace Library;
 
 namespace Rendering
 {
-	//const XMVECTORF32 RenderingGame::BackgroundColor = Colors::CornflowerBlue;
 	const XMVECTORF32 RenderingGame::BackgroundColor = Colors::Black;
 	const float RenderingGame::DistanceMultiplier = 50.0f;
 	const float RenderingGame::OrbitalPeriodMultipler = 0.1f;
@@ -58,10 +57,9 @@ namespace Rendering
 			Exit();
 		}
 
-		if (mKeyboard->WasKeyPressedThisFrame(Keys::G) || mGamePad->WasButtonPressedThisFrame(GamePadButtons::DPadUp))
+		if (mKeyboard->WasKeyPressedThisFrame(Keys::Q) || mGamePad->WasButtonPressedThisFrame(GamePadButtons::DPadUp))
 		{
-			//mGrid->SetEnabled(!mGrid->Enabled());
-			//mGrid->SetVisible(!mGrid->Visible());
+			mCamera->SetPosition(0.0f, 0.0f, 0.0f);
 		}
 
 		Game::Update(gameTime);

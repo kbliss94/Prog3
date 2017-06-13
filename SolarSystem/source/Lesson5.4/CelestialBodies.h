@@ -127,5 +127,8 @@ namespace Rendering
 		bool mAnimationEnabled;
 
 		std::shared_ptr<CelestialBodies> mParent;
+
+		const float OrbitalSpeedFactor = 0.1f;
+		const float RotationalSpeedFactor = .001f;
 	};
 }

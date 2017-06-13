@@ -86,8 +86,8 @@ namespace Rendering
 		{
 			if (mParent == nullptr)
 			{
-				mAxialAngle += gameTime.ElapsedGameTimeSeconds().count() * mRotationalPeriod;
-				mOrbitalAngle += gameTime.ElapsedGameTimeSeconds().count() * mOrbitalPeriod;
+				mAxialAngle += gameTime.ElapsedGameTimeSeconds().count() * (1 / mRotationalPeriod) * RotationalSpeedFactor;
+				mOrbitalAngle += gameTime.ElapsedGameTimeSeconds().count() * (1 / mOrbitalPeriod) * OrbitalSpeedFactor;
 
 				matScale = XMMatrixScaling(mScale, mScale, mScale);
 				matAxialRot = XMMatrixRotationY(mAxialAngle);
@@ -98,8 +98,8 @@ namespace Rendering
 			}
 			else
 			{
-				mAxialAngle += gameTime.ElapsedGameTimeSeconds().count() * mRotationalPeriod;
-				mOrbitalAngle += gameTime.ElapsedGameTimeSeconds().count() * mOrbitalPeriod;
+				mAxialAngle += gameTime.ElapsedGameTimeSeconds().count() * (1 / mRotationalPeriod) * RotationalSpeedFactor;
+				mOrbitalAngle += gameTime.ElapsedGameTimeSeconds().count() * (1 / mOrbitalPeriod) * OrbitalSpeedFactor;
 
 				matScale = XMMatrixScaling(mScale, mScale, mScale);
 				matAxialRot = XMMatrixRotationY(mAxialAngle);

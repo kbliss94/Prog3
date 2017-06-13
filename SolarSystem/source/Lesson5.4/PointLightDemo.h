@@ -28,7 +28,6 @@ namespace Rendering
 		RTTI_DECLARATIONS(PointLightDemo, Library::DrawableGameComponent)
 
 	public:
-		//PointLightDemo(Library::Game& game, const std::shared_ptr<Library::Camera>& camera);
 		PointLightDemo(Library::Game& game, const std::shared_ptr<Library::Camera>& camera, float orbitRadius, float scale, float orbPer, float rotPer, float axTilt, std::wstring texFilename, std::wstring specFilename);
 
 		bool AnimationEnabled() const;
@@ -98,7 +97,6 @@ namespace Rendering
 
 		void CreateVertexBuffer(const Library::Mesh& mesh, ID3D11Buffer** vertexBuffer) const;
 		void ToggleAnimation();
-		void UpdateAmbientLight(const Library::GameTime& gameTime);
 		void UpdatePointLight(const Library::GameTime& gameTime);
 		void UpdateSpecularLight(const Library::GameTime& gameTime);
 				
@@ -118,10 +116,11 @@ namespace Rendering
 		float mOrbitalAngle;
 		float mAxialTilt;
 
-		static const int NumCelestialBodies = 11;
+		static const int NumCelestialBodies = 10;
 		static const int MoonIndex = NumCelestialBodies - 1;
-		static const int EarthIndex = 3;
+		static const int EarthIndex = 2;
 		static const float DistanceMultiplier;
+		static const float SpeedFactor;
 
 		PSCBufferPerFrame mPSCBufferPerFrameData;
 		DirectX::XMFLOAT4X4 mWorldMatrix;
@@ -149,37 +148,155 @@ namespace Rendering
 		DirectX::XMFLOAT2 mTextPosition;
 		bool mAnimationEnabled;
 
-		//std::shared_ptr<CelestialBodies> mMercury;
-
-		std::vector<std::shared_ptr<CelestialBodies>> mCelestialBodies;
-
-		//orbital periods in years
-		//std::vector<float> mOrbitalVelocities = { 0.0f, .241f, .616f, 1.0f, 1.88f, 11.86f, 29.41f, 84.04f, 163.72f, 247.93f, .074f };
-
-		//rotational periods in years
-		//std::vector<float> mRotationalVelocities = { 0.0f, .161f, .666f, .003f, .003f, .001f, .001f, .002f, .002f, .017f, .074f };
-
-		std::vector<float> mOrbitRadii = { 0.0f, .387f, .723f, 1.0f, 1.524f, 5.203f, 9.582f, 19.2f, 30.05f, 39.48f, .2f };//.003f };
-		std::vector<float> mScales = { 1.0f, .382f, .949f, 1.0f, .532f, 11.19f, 9.26f, 4.01f, 3.88f, .18f, .272f };
-		std::vector<float> mOrbitalVelocities = { 0.0f, 1.606f, 1.174f, 1.0f, .811f, .439f, .326f, .228f, .184f, .159f, .035f };
-		////std::vector<float> mRotationalVelocities = { 0.0f, .0007f, .0004f, .10f, .0532f, 2.732f, 2.1746f, .5595f, .578f, .0028f, .01f };
-		std::vector<float> mRotationalVelocities = { 0.0f, .007f, .004f, 1.0f, .532f, 27.32f, 21.746f, 5.595f, 5.78f, .028f, .01f };
-		std::vector<float> mAxialTilts = { 0.0f, 0.0f, 3.096f, .410f, .436f, .052f, .471f, 1.709f, .517f, 2.129f, .026f };
-		std::vector<std::wstring> mTextureFilenames = 
+		struct CelestialBodyData
 		{
-			L"Content\\Textures\\SunComposite.dds",
-			L"Content\\Textures\\MercuryComposite.dds",
-			L"Content\\Textures\\VenusComposite.dds",
-			L"Content\\Textures\\EarthComposite.dds",
-			L"Content\\Textures\\MarsComposite.dds",
-			L"Content\\Textures\\JupiterComposite.dds",
-			L"Content\\Textures\\SaturnComposite.dds",
-			L"Content\\Textures\\UranusComposite.dds",
-			L"Content\\Textures\\NeptuneComposite.dds",
-			L"Content\\Textures\\PlutoComposite.dds",
-			L"Content\\Textures\\MoonComposite.dds"
+			std::string Name;
+			float OrbitRadius;
+			float Scale;
+			float OrbitalPeriod;
+			float RotationalPeriod;
+			float AxialTilt;
+			std::wstring TextureFilename;
+			std::wstring SpecularFilename;
+			CelestialBodies* Parent;
+
+			CelestialBodyData() = default;
+			CelestialBodyData(const std::string& name, float orbitRad, float scale, float orbPer, float rotPer, float axialTilt, std::wstring texFile, std::wstring specFile, CelestialBodies* parent) :
+				Name(name), OrbitRadius(orbitRad), Scale(scale), OrbitalPeriod(orbPer), RotationalPeriod(rotPer), AxialTilt(axialTilt), TextureFilename(texFile),
+				SpecularFilename(specFile), Parent(parent) { };
 		};
 
-		std::wstring mSpecularFilenames = L"Content\\Textures\\MarsSpecularMap.png";
+		std::vector<std::shared_ptr<CelestialBodies>> mCelestialBodies;
+		std::vector<std::shared_ptr<CelestialBodyData>> mCelestialBodyDataList;
+
+		CelestialBodyData Mercury =
+		{
+			"Mercury",									//Name
+			.387f,										//Orbit radius
+			.382f,										//Scale
+			.241f,										//Orbital period (yrs)
+			.161f,										//Rotational period (yrs)
+			0.0f,										//Axial tilt (radians)
+			L"Content\\Textures\\MercuryComposite.dds",	//Texture filename
+			L"Content\\Textures\\MarsSpecularMap.png",	//Specular filename
+			nullptr										//Parent
+		};
+
+		CelestialBodyData Venus =
+		{
+			"Venus",									//Name
+			.723f,										//Orbit radius
+			.949f,										//Scale
+			.616f,										//Orbital period (yrs)
+			.666f,										//Rotational period (yrs)
+			3.096f,										//Axial tilt (radians)
+			L"Content\\Textures\\VenusComposite.dds",	//Texture filename
+			L"Content\\Textures\\MarsSpecularMap.png",	//Specular filename
+			nullptr										//Parent
+		};
+
+		CelestialBodyData Earth =
+		{
+			"Earth",									//Name
+			1.0f,										//Orbit radius
+			1.0f,										//Scale
+			1.0f,										//Orbital period (yrs)
+			.003f,										//Rotational period (yrs)
+			.410f,										//Axial tilt (radians)
+			L"Content\\Textures\\EarthComposite.dds",	//Texture filename
+			L"Content\\Textures\\MarsSpecularMap.png",	//Specular filename
+			nullptr										//Parent
+		};
+
+		CelestialBodyData Mars =
+		{
+			"Mars",										//Name
+			1.524f,										//Orbit radius
+			.532f,										//Scale
+			1.88f,										//Orbital period (yrs)
+			.003f,										//Rotational period (yrs)
+			.436f,										//Axial tilt (radians)
+			L"Content\\Textures\\MarsComposite.dds",	//Texture filename
+			L"Content\\Textures\\MarsSpecularMap.png",	//Specular filename
+			nullptr										//Parent
+		};
+
+		CelestialBodyData Jupiter =
+		{
+			"Jupiter",									//Name
+			5.203f,										//Orbit radius
+			11.19f,										//Scale
+			11.86f,										//Orbital period (yrs)
+			.001f,										//Rotational period (yrs)
+			.052f,										//Axial tilt (radians)
+			L"Content\\Textures\\JupiterComposite.dds",	//Texture filename
+			L"Content\\Textures\\MarsSpecularMap.png",	//Specular filename
+			nullptr										//Parent
+		};
+
+		CelestialBodyData Saturn =
+		{
+			"Saturn",									//Name
+			9.582f,										//Orbit radius
+			9.26f,										//Scale
+			29.410f,									//Orbital period (yrs)
+			.001f,										//Rotational period (yrs)
+			.471f,										//Axial tilt (radians)
+			L"Content\\Textures\\SaturnComposite.dds",	//Texture filename
+			L"Content\\Textures\\MarsSpecularMap.png",	//Specular filename
+			nullptr										//Parent
+		};
+
+		CelestialBodyData Uranus =
+		{
+			"Uranus",									//Name
+			19.2f,										//Orbit radius
+			4.01f,										//Scale
+			84.04f,										//Orbital period (yrs)
+			.002f,										//Rotational period (yrs)
+			1.709f,										//Axial tilt (radians)
+			L"Content\\Textures\\UranusComposite.dds",	//Texture filename
+			L"Content\\Textures\\MarsSpecularMap.png",	//Specular filename
+			nullptr										//Parent
+		};
+
+		CelestialBodyData Neptune =
+		{
+			"Neptune",									//Name
+			30.05f,										//Orbit radius
+			3.88f,										//Scale
+			163.72f,									//Orbital period (yrs)
+			.002f,										//Rotational period (yrs)
+			.517f,										//Axial tilt (radians)
+			L"Content\\Textures\\NeptuneComposite.dds",	//Texture filename
+			L"Content\\Textures\\MarsSpecularMap.png",	//Specular filename
+			nullptr										//Parent
+		};
+
+		CelestialBodyData Pluto =
+		{
+			"Pluto",									//Name
+			39.48f,										//Orbit radius
+			.18f,										//Scale
+			247.93f,									//Orbital period (yrs)
+			.017f,										//Rotational period (yrs)
+			2.129f,										//Axial tilt (radians)
+			L"Content\\Textures\\PlutoComposite.dds",	//Texture filename
+			L"Content\\Textures\\MarsSpecularMap.png",	//Specular filename
+			nullptr
+		};
+
+		CelestialBodyData Moon =
+		{
+			"Moon",										//Name
+			.2f,										//Orbit radius
+			.272f,										//Scale
+			.074f,										//Orbital period (yrs)
+			.074f,										//Rotational period (yrs)
+			.026f,										//Axial tilt (radians)
+			L"Content\\Textures\\MoonComposite.dds",	//Texture filename
+			L"Content\\Textures\\MarsSpecularMap.png",	//Specular filename
+			nullptr										//Parent
+		};
 	};
 }
