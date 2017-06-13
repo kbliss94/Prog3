@@ -8,12 +8,11 @@ namespace Rendering
 {
 	RTTI_DEFINITIONS(PointLightDemo)
 
-	const float PointLightDemo::ModelRotationRate = 0.3f;//XM_PI;
 	const float PointLightDemo::LightModulationRate = UCHAR_MAX;
 	const float PointLightDemo::LightMovementRate = 10.0f;
-
+	const float PointLightDemo::SunAmbientColor = 0.8f;
+	const float PointLightDemo::PlanetAmbientColor = 0.0f;
 	const float PointLightDemo::DistanceMultiplier = 50.0f;
-	//const int PointLightDemo::NumCelestialBodies = 10;
 
 	PointLightDemo::PointLightDemo(Game & game, const shared_ptr<Camera>& camera, float orbitRadius, float scale, float orbPer, float rotPer, float axTilt, wstring texFilename, wstring specFilename) :
 		DrawableGameComponent(game, camera), mWorldMatrix(MatrixHelper::Identity), mPointLight(game, XMFLOAT3(0.0f, 0.0f, 0.0f), 100000.0f), //mPointLight(game, XMFLOAT3(5.0f, 0.0f, 10.0f), 50.0f),
@@ -82,12 +81,6 @@ namespace Rendering
 		ThrowIfFailed(CreateDDSTextureFromFile(mGame->Direct3DDevice(), mTextureFilename.c_str(), nullptr, mColorTexture.ReleaseAndGetAddressOf()), "CreateDDSTextureFromFile() failed.");
 		ThrowIfFailed(CreateWICTextureFromFile(mGame->Direct3DDevice(), mSpecularFilename.c_str(), nullptr, mSpecularMap.ReleaseAndGetAddressOf()), "CreateWICTextureFromFile() failed.");
 
-		//wstring textureName = L"Content\\Textures\\EarthComposite.dds";
-		//ThrowIfFailed(CreateDDSTextureFromFile(mGame->Direct3DDevice(), textureName.c_str(), nullptr, mColorTexture.ReleaseAndGetAddressOf()), "CreateDDSTextureFromFile() failed.");
-
-		//textureName = L"Content\\Textures\\EarthSpecularMap.png";
-		//ThrowIfFailed(CreateWICTextureFromFile(mGame->Direct3DDevice(), textureName.c_str(), nullptr, mSpecularMap.ReleaseAndGetAddressOf()), "CreateWICTextureFromFile() failed.");
-
 		// Create text rendering helpers
 		mSpriteBatch = make_unique<SpriteBatch>(mGame->Direct3DDeviceContext());
 		mSpriteFont = make_unique<SpriteFont>(mGame->Direct3DDevice(), L"Content\\Fonts\\Arial_14_Regular.spritefont");
@@ -106,17 +99,22 @@ namespace Rendering
 		mGame->Direct3DDeviceContext()->UpdateSubresource(mPSCBufferPerObject.Get(), 0, nullptr, &mPSCBufferPerObjectData, 0, 0);
 
 		// Load a proxy model for the point light
-		mProxyModel = make_unique<ProxyModel>(*mGame, mCamera, "Content\\Models\\Sphere.obj.bin", 1.0f);//0.5f);
+		mProxyModel = make_unique<ProxyModel>(*mGame, mCamera, "Content\\Models\\Sphere.obj.bin", 1.0f);
 		mProxyModel->Initialize();
 		mProxyModel->SetPosition(mPointLight.Position());
 
 		mCelestialBodies.resize(NumCelestialBodies);
 
-		for (int i = 0; i < NumCelestialBodies; ++i)
+		for (int i = 0; i < NumCelestialBodies - 1; ++i)
 		{
 			mCelestialBodies[i] = make_shared<CelestialBodies>(*mGame, mCamera, mOrbitRadii[i] * DistanceMultiplier, mScales[i], mOrbitalVelocities[i],
 				mRotationalVelocities[i], mAxialTilts[i], mTextureFilenames[i], mSpecularFilenames, mVSCBufferPerFrame, mVSCBufferPerObject);
 		}
+
+		// Initializing the moon
+		mCelestialBodies[MoonIndex] = make_shared<CelestialBodies>(*mGame, mCamera, mOrbitRadii[MoonIndex] * DistanceMultiplier, mScales[MoonIndex],
+			mOrbitalVelocities[MoonIndex], mRotationalVelocities[MoonIndex], mAxialTilts[MoonIndex], mTextureFilenames[MoonIndex], mSpecularFilenames, mVSCBufferPerFrame, mVSCBufferPerObject,
+			mCelestialBodies[EarthIndex]);
 
 		for (int i = 0; i < NumCelestialBodies; ++i)
 		{
@@ -169,6 +167,9 @@ namespace Rendering
 
 	void PointLightDemo::Draw(const GameTime& gameTime)
 	{
+		mPSCBufferPerFrameData.AmbientColor = XMFLOAT3(SunAmbientColor, SunAmbientColor, SunAmbientColor);
+		mGame->Direct3DDeviceContext()->UpdateSubresource(mPSCBufferPerFrame.Get(), 0, nullptr, &mPSCBufferPerFrameData, 0, 0);
+
 		UNREFERENCED_PARAMETER(gameTime);
 		assert(mCamera != nullptr);
 
@@ -229,6 +230,9 @@ namespace Rendering
 		mSpriteBatch->End();
 		mRenderStateHelper.RestoreAll();
 
+		mPSCBufferPerFrameData.AmbientColor = XMFLOAT3(PlanetAmbientColor, PlanetAmbientColor, PlanetAmbientColor);
+		mGame->Direct3DDeviceContext()->UpdateSubresource(mPSCBufferPerFrame.Get(), 0, nullptr, &mPSCBufferPerFrameData, 0, 0);
+
 		for (int i = 0; i < NumCelestialBodies; ++i)
 		{
 			mCelestialBodies[i]->Draw(gameTime);
@@ -268,26 +272,28 @@ namespace Rendering
 
 	void PointLightDemo::UpdateAmbientLight(const GameTime& gameTime)
 	{
-		static float ambientIntensity = mPSCBufferPerFrameData.AmbientColor.x;
+		gameTime;
 
-		assert(mKeyboard != nullptr);
+		//static float ambientIntensity = mPSCBufferPerFrameData.AmbientColor.x;
 
-		if (mKeyboard->IsKeyDown(Keys::PageUp) && ambientIntensity < 1.0f)
-		{
-			ambientIntensity += gameTime.ElapsedGameTimeSeconds().count();
-			ambientIntensity = min(ambientIntensity, 1.0f);
+		//assert(mKeyboard != nullptr);
 
-			mPSCBufferPerFrameData.AmbientColor = XMFLOAT3(ambientIntensity, ambientIntensity, ambientIntensity);
-			mGame->Direct3DDeviceContext()->UpdateSubresource(mPSCBufferPerFrame.Get(), 0, nullptr, &mPSCBufferPerFrameData, 0, 0);
-		}
-		else if (mKeyboard->IsKeyDown(Keys::PageDown) && ambientIntensity > 0.0f)
-		{
-			ambientIntensity -= gameTime.ElapsedGameTimeSeconds().count();
-			ambientIntensity = max(ambientIntensity, 0.0f);
+		//if (mKeyboard->IsKeyDown(Keys::PageUp) && ambientIntensity < 1.0f)
+		//{
+		//	ambientIntensity += gameTime.ElapsedGameTimeSeconds().count();
+		//	ambientIntensity = min(ambientIntensity, 1.0f);
 
-			mPSCBufferPerFrameData.AmbientColor = XMFLOAT3(ambientIntensity, ambientIntensity, ambientIntensity);
-			mGame->Direct3DDeviceContext()->UpdateSubresource(mPSCBufferPerFrame.Get(), 0, nullptr, &mPSCBufferPerFrameData, 0, 0);
-		}
+		//	mPSCBufferPerFrameData.AmbientColor = XMFLOAT3(ambientIntensity, ambientIntensity, ambientIntensity);
+		//	mGame->Direct3DDeviceContext()->UpdateSubresource(mPSCBufferPerFrame.Get(), 0, nullptr, &mPSCBufferPerFrameData, 0, 0);
+		//}
+		//else if (mKeyboard->IsKeyDown(Keys::PageDown) && ambientIntensity > 0.0f)
+		//{
+		//	ambientIntensity -= gameTime.ElapsedGameTimeSeconds().count();
+		//	ambientIntensity = max(ambientIntensity, 0.0f);
+
+		//	mPSCBufferPerFrameData.AmbientColor = XMFLOAT3(ambientIntensity, ambientIntensity, ambientIntensity);
+		//	mGame->Direct3DDeviceContext()->UpdateSubresource(mPSCBufferPerFrame.Get(), 0, nullptr, &mPSCBufferPerFrameData, 0, 0);
+		//}
 	}
 
 	void PointLightDemo::UpdatePointLight(const GameTime& gameTime)

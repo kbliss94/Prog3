@@ -45,7 +45,7 @@ namespace Rendering
 			float LightRadius;
 
 			VSCBufferPerFrame() :
-				LightPosition(Library::Vector3Helper::Zero), LightRadius(50.0f) { }
+				LightPosition(Library::Vector3Helper::Zero), LightRadius(100000.0f) { }
 			VSCBufferPerFrame(const DirectX::XMFLOAT3 lightPosition, float lightRadius) :
 				LightPosition(lightPosition), LightRadius(lightRadius) { }
 		};
@@ -102,9 +102,10 @@ namespace Rendering
 		void UpdatePointLight(const Library::GameTime& gameTime);
 		void UpdateSpecularLight(const Library::GameTime& gameTime);
 				
-		static const float ModelRotationRate;
 		static const float LightModulationRate;
 		static const float LightMovementRate;
+		static const float SunAmbientColor;
+		static const float PlanetAmbientColor;
 
 		float mOrbitalDistance;
 		float mScale;
@@ -117,7 +118,9 @@ namespace Rendering
 		float mOrbitalAngle;
 		float mAxialTilt;
 
-		static const int NumCelestialBodies = 10;
+		static const int NumCelestialBodies = 11;
+		static const int MoonIndex = NumCelestialBodies - 1;
+		static const int EarthIndex = 3;
 		static const float DistanceMultiplier;
 
 		PSCBufferPerFrame mPSCBufferPerFrameData;
@@ -150,11 +153,18 @@ namespace Rendering
 
 		std::vector<std::shared_ptr<CelestialBodies>> mCelestialBodies;
 
-		std::vector<float> mOrbitRadii = { 0.0f, .387f, .723f, 1.0f, 1.524f, 5.203f, 9.582f, 19.2f, 30.05f, 39.48f };
-		std::vector<float> mScales = { 1.0f, .382f, .949f, 1.0f, .532f, 11.19f, 9.26f, 4.01f, 3.88f, .18f };
-		std::vector<float> mOrbitalVelocities = { 0.0f, 1.606f, 1.174f, 1.0f, .811f, .439f, .326f, .228f, .184f, .159f };
-		std::vector<float> mRotationalVelocities = { 0.0f, .0007f, .0004f, .10f, .0532f, 2.732f, 2.1746f, .5595f, .578f, .0028f };
-		std::vector<float> mAxialTilts = { 0.0f, 0.0f, 3.096f, .410f, .436f, .052f, .471f, 1.709f, .517f, 2.129f };
+		//orbital periods in years
+		//std::vector<float> mOrbitalVelocities = { 0.0f, .241f, .616f, 1.0f, 1.88f, 11.86f, 29.41f, 84.04f, 163.72f, 247.93f, .074f };
+
+		//rotational periods in years
+		//std::vector<float> mRotationalVelocities = { 0.0f, .161f, .666f, .003f, .003f, .001f, .001f, .002f, .002f, .017f, .074f };
+
+		std::vector<float> mOrbitRadii = { 0.0f, .387f, .723f, 1.0f, 1.524f, 5.203f, 9.582f, 19.2f, 30.05f, 39.48f, .2f };//.003f };
+		std::vector<float> mScales = { 1.0f, .382f, .949f, 1.0f, .532f, 11.19f, 9.26f, 4.01f, 3.88f, .18f, .272f };
+		std::vector<float> mOrbitalVelocities = { 0.0f, 1.606f, 1.174f, 1.0f, .811f, .439f, .326f, .228f, .184f, .159f, .035f };
+		////std::vector<float> mRotationalVelocities = { 0.0f, .0007f, .0004f, .10f, .0532f, 2.732f, 2.1746f, .5595f, .578f, .0028f, .01f };
+		std::vector<float> mRotationalVelocities = { 0.0f, .007f, .004f, 1.0f, .532f, 27.32f, 21.746f, 5.595f, 5.78f, .028f, .01f };
+		std::vector<float> mAxialTilts = { 0.0f, 0.0f, 3.096f, .410f, .436f, .052f, .471f, 1.709f, .517f, 2.129f, .026f };
 		std::vector<std::wstring> mTextureFilenames = 
 		{
 			L"Content\\Textures\\SunComposite.dds",
@@ -166,7 +176,8 @@ namespace Rendering
 			L"Content\\Textures\\SaturnComposite.dds",
 			L"Content\\Textures\\UranusComposite.dds",
 			L"Content\\Textures\\NeptuneComposite.dds",
-			L"Content\\Textures\\PlutoComposite.dds"
+			L"Content\\Textures\\PlutoComposite.dds",
+			L"Content\\Textures\\MoonComposite.dds"
 		};
 
 		std::wstring mSpecularFilenames = L"Content\\Textures\\MarsSpecularMap.png";

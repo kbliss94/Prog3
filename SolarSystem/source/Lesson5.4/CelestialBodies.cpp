@@ -9,15 +9,13 @@ namespace Rendering
 {
 	RTTI_DEFINITIONS(CelestialBodies)
 
-	const float CelestialBodies::LightModulationRate = UCHAR_MAX;
-	const float CelestialBodies::LightMovementRate = 10.0f;
-
 	CelestialBodies::CelestialBodies(Game & game, const shared_ptr<Camera>& camera, float orbitRadius, float scale, float orbPer, float rotPer, float axTilt, 
-		wstring texFilename, wstring specFilename, Microsoft::WRL::ComPtr<ID3D11Buffer> frameBuffer, Microsoft::WRL::ComPtr<ID3D11Buffer> objectBuffer) :
+		wstring texFilename, wstring specFilename, Microsoft::WRL::ComPtr<ID3D11Buffer> frameBuffer, Microsoft::WRL::ComPtr<ID3D11Buffer> objectBuffer,
+		std::shared_ptr<CelestialBodies> parent) :
 		DrawableGameComponent(game, camera), mWorldMatrix(MatrixHelper::Identity), mRenderStateHelper(game), mIndexCount(0),
 		mAnimationEnabled(false), mOrbitalDistance(orbitRadius), mTextureFilename(texFilename), mSpecularFilename(specFilename), mScale(scale), 
 		mOrbitalPeriod(orbPer), mRotationalPeriod(rotPer), mAxialAngle(0.0f), mOrbitalAngle(0.0f), mAxialTilt(axTilt), 
-		mVSCBufferPerFrame(frameBuffer), mVSCBufferPerObject(objectBuffer)
+		mVSCBufferPerFrame(frameBuffer), mVSCBufferPerObject(objectBuffer), mParent(parent)
 	{
 	}
 
@@ -86,15 +84,33 @@ namespace Rendering
 
 		if (mAnimationEnabled)
 		{
-			mAxialAngle += gameTime.ElapsedGameTimeSeconds().count() * mRotationalPeriod;
-			mOrbitalAngle += gameTime.ElapsedGameTimeSeconds().count() * mOrbitalPeriod;
+			if (mParent == nullptr)
+			{
+				mAxialAngle += gameTime.ElapsedGameTimeSeconds().count() * mRotationalPeriod;
+				mOrbitalAngle += gameTime.ElapsedGameTimeSeconds().count() * mOrbitalPeriod;
 
-			matScale = XMMatrixScaling(mScale, mScale, mScale);
-			matAxialRot = XMMatrixRotationY(mAxialAngle);
-			matAxialTilt = XMMatrixRotationZ(mAxialTilt);
-			matOrbitalRot = XMMatrixRotationY(mOrbitalAngle);
-			matTrans = XMMatrixTranslation(angle, angle, mOrbitalDistance);
-			XMStoreFloat4x4(&mWorldMatrix, (matScale * matAxialRot * matAxialTilt * matTrans * matOrbitalRot));
+				matScale = XMMatrixScaling(mScale, mScale, mScale);
+				matAxialRot = XMMatrixRotationY(mAxialAngle);
+				matAxialTilt = XMMatrixRotationZ(mAxialTilt);
+				matOrbitalRot = XMMatrixRotationY(mOrbitalAngle);
+				matTrans = XMMatrixTranslation(angle, angle, mOrbitalDistance);
+				XMStoreFloat4x4(&mWorldMatrix, (matScale * matAxialRot * matAxialTilt * matTrans * matOrbitalRot));
+			}
+			else
+			{
+				mAxialAngle += gameTime.ElapsedGameTimeSeconds().count() * mRotationalPeriod;
+				mOrbitalAngle += gameTime.ElapsedGameTimeSeconds().count() * mOrbitalPeriod;
+
+				matScale = XMMatrixScaling(mScale, mScale, mScale);
+				matAxialRot = XMMatrixRotationY(mAxialAngle);
+				matAxialTilt = XMMatrixRotationZ(mAxialTilt);
+				matOrbitalRot = XMMatrixRotationY(mOrbitalAngle);
+				matTrans = XMMatrixTranslation(angle, angle, mOrbitalDistance);
+
+				XMMATRIX parentMatrix = XMLoadFloat4x4(&mParent->mWorldMatrix);
+
+				XMStoreFloat4x4(&mWorldMatrix, (matScale * matAxialRot * matAxialTilt * matTrans * matOrbitalRot * parentMatrix));
+			}
 		}
 
 		if (mKeyboard != nullptr)

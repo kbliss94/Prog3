@@ -27,7 +27,8 @@ namespace Rendering
 
 	public:
 		CelestialBodies(Library::Game& game, const std::shared_ptr<Library::Camera>& camera, float orbitRadius, float scale, float orbPer, float rotPer, float axTilt, 
-			std::wstring texFilename, std::wstring specFilename, Microsoft::WRL::ComPtr<ID3D11Buffer> frameBuffer, Microsoft::WRL::ComPtr<ID3D11Buffer> objectBuffer);
+			std::wstring texFilename, std::wstring specFilename, Microsoft::WRL::ComPtr<ID3D11Buffer> frameBuffer, Microsoft::WRL::ComPtr<ID3D11Buffer> objectBuffer,
+			std::shared_ptr<CelestialBodies> parent = nullptr);
 
 		bool AnimationEnabled() const;
 		void SetAnimationEnabled(bool enabled);
@@ -43,7 +44,7 @@ namespace Rendering
 			float LightRadius;
 
 			VSCBufferPerFrame() :
-				LightPosition(Library::Vector3Helper::Zero), LightRadius(50.0f) { }
+				LightPosition(Library::Vector3Helper::Zero), LightRadius(100000.0f) { }
 			VSCBufferPerFrame(const DirectX::XMFLOAT3 lightPosition, float lightRadius) :
 				LightPosition(lightPosition), LightRadius(lightRadius) { }
 		};
@@ -97,9 +98,6 @@ namespace Rendering
 		void CreateVertexBuffer(const Library::Mesh& mesh, ID3D11Buffer** vertexBuffer) const;
 		void ToggleAnimation();
 
-		static const float LightModulationRate;
-		static const float LightMovementRate;
-
 		float mOrbitalDistance;
 		float mScale;
 		float mOrbitalPeriod;
@@ -127,5 +125,7 @@ namespace Rendering
 		Library::KeyboardComponent* mKeyboard;
 		std::uint32_t mIndexCount;
 		bool mAnimationEnabled;
+
+		std::shared_ptr<CelestialBodies> mParent;
 	};
 }
